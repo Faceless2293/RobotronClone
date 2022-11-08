@@ -2,15 +2,16 @@
 
 #include <sstream>
 
-Player::Player(int argc, char* argv[]) : Game(argc, argv), _cPlayerSpeed(0.2f), _cPlayerFrameTime(250)
+Player::Player(int argc, char* argv[]) : Game(argc, argv), _cPlayerSpeed(0.2f), _cPlayerFrameTime(250), _cBulletSpeed(100)
 {
-	_frameCount = 0;
+	_player = new player();
+	_player->_frame = 0;
 	_paused = false;
 	_started = true;
-	_playerCurrentFrameTime = 0;
-	_playerFrame = 0;
-	_playerSpriteTraversal = 0;
-	_playerDirection = 0;
+	_player->currentFrameTime = 0;
+	_player->_frame = 0;
+	_player->_spriteTraversal = 0;
+	_player->_direction = 0;
 
 	//Initialise important Game aspects
 	Graphics::Initialise(argc, argv, this, 1024, 768, false, 25, 25, "Pacman", 60);
@@ -22,8 +23,8 @@ Player::Player(int argc, char* argv[]) : Game(argc, argv), _cPlayerSpeed(0.2f), 
 
 Player::~Player()
 {
-	delete _playerTexture;
-	delete _playerWalkTexture;
+	delete _player->texture;
+	delete _player->walkTexture;
 	delete _playerSourceRect;
 	delete _bulletTexture;
 	delete _bulletRect;
@@ -33,6 +34,7 @@ Player::~Player()
 	delete _startBackground;
 	delete _startRectangle;
 	delete _startStringPosition;
+	
 }
 
 void Player::LoadContent()
@@ -40,17 +42,14 @@ void Player::LoadContent()
 	// Load Pacman
 	_playerTexture = new Texture2D();
 	_playerTexture->Load("Textures/Player.png", false);
-	/*
-	_playerWalkTexture = new Texture2D();
-	_playerWalkTexture->Load("Textures/SkellyWalk.png", false);
-	*/
 	_playerPosition = new Vector2(350.0f, 350.0f);
 	_playerSourceRect = new Rect(0.0f, 0.0f, 32, 32);
 
 	// Load Munchie
 	_bulletTexture = new Texture2D();
-	_bulletTexture->Load("Textures/PlayerBullet.png", true);
-	_bulletRect = new Rect(100.0f, 450.0f, 12, 12);
+	_bulletTexture->Load("Textures/PlayerBullet.png", false);
+	_bulletRect = new Rect(0.0f, 0.0f, 32, 32);
+
 
 	// Set string position
 	_stringPosition = new Vector2(10.0f, 25.0f);
@@ -172,11 +171,13 @@ void Player::Draw(int elapsedTime)
 		SpriteBatch::Draw(_bulletTexture, _playerPosition, _bulletRect);
 	}
 
+	
+
 	// Draws String
 	SpriteBatch::DrawString(stream.str().c_str(), _stringPosition, Color::Green);
 	SpriteBatch::EndDraw(); // Ends Drawing
 }
-void Player::AttackInput() 
+void Player::AttackInput(int elapsedTime) 
 {
 	Input::KeyboardState* keyboardState = Input::Keyboard::GetState();
 
@@ -184,18 +185,22 @@ void Player::AttackInput()
 	if (keyboardState->IsKeyDown(Input::Keys::LEFT)) 
 	{
 		_isShooting = true;
+		_bulletPosition->X -= _cBulletSpeed * elapsedTime;
 	}
 	else if (keyboardState->IsKeyDown(Input::Keys::RIGHT)) 
 	{
 		_isShooting = true;
+		_bulletPosition->X += _cBulletSpeed * elapsedTime;
 	}
 	else if (keyboardState->IsKeyDown(Input::Keys::UP))
 	{
 		_isShooting = true;
+		_bulletPosition->Y += _cBulletSpeed * elapsedTime;
 	}
 	else if (keyboardState->IsKeyDown(Input::Keys::DOWN))
 	{
 		_isShooting = true;
+		_bulletPosition->Y -= _cBulletSpeed * elapsedTime;
 	}
 }
 void Player::CheckPaused(Input::KeyboardState* state, Input::Keys pauseKey) 
@@ -243,4 +248,8 @@ void Player::UpdatePlayer(int elapsedTime)
 void Player::UpdateCoin(int elapsedTime)
 {
 
+}
+void Player::SpawnBullet() 
+{
+	
 }

@@ -1,21 +1,34 @@
-﻿  Player.cpp
-C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.33.31629\include\vector(2061,41): warning C4251: 'std::vector<S2D::Input::Keys,std::allocator<S2D::Input::Keys>>::_Mypair': class 'std::_Compressed_pair<std::allocator<S2D::Input::Keys>,std::_Vector_val<std::_Simple_types<_Ty>>,true>' needs to have dll-interface to be used by clients of class 'std::vector<S2D::Input::Keys,std::allocator<S2D::Input::Keys>>'
+﻿  main.cpp
+C:\Program Files\Microsoft Visual Studio\2022\Professional\VC\Tools\MSVC\14.32.31326\include\vector(2045,41): warning C4251: 'std::vector<S2D::Input::Keys,std::allocator<S2D::Input::Keys>>::_Mypair': class 'std::_Compressed_pair<std::allocator<S2D::Input::Keys>,std::_Vector_val<std::_Simple_types<_Ty>>,true>' needs to have dll-interface to be used by clients of class 'std::vector<S2D::Input::Keys,std::allocator<S2D::Input::Keys>>'
           with
           [
               _Ty=S2D::Input::Keys
           ]
-C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.33.31629\include\vector(2061): message : see declaration of 'std::_Compressed_pair<std::allocator<S2D::Input::Keys>,std::_Vector_val<std::_Simple_types<_Ty>>,true>'
+C:\Program Files\Microsoft Visual Studio\2022\Professional\VC\Tools\MSVC\14.32.31326\include\vector(2045): message : see declaration of 'std::_Compressed_pair<std::allocator<S2D::Input::Keys>,std::_Vector_val<std::_Simple_types<_Ty>>,true>'
           with
           [
               _Ty=S2D::Input::Keys
           ]
-C:\Users\bradw\OneDrive - Staffordshire University\Pacman\Pacman\S2D\Input.h(108): message : see reference to class template instantiation 'std::vector<S2D::Input::Keys,std::allocator<S2D::Input::Keys>>' being compiled
-C:\Users\bradw\OneDrive - Staffordshire University\Pacman\Pacman\Player.cpp(67,108): warning C4244: 'argument': conversion from 'float' to 'int', possible loss of data
-C:\Users\bradw\OneDrive - Staffordshire University\Pacman\Pacman\Player.cpp(67,70): warning C4244: 'argument': conversion from 'float' to 'int', possible loss of data
-C:\Users\bradw\OneDrive - Staffordshire University\Pacman\Pacman\Player.cpp(210,28): warning C4244: '=': conversion from 'int' to 'float', possible loss of data
-C:\Users\bradw\OneDrive - Staffordshire University\Pacman\Pacman\Player.cpp(214,29): warning C4244: '=': conversion from 'int' to 'float', possible loss of data
-C:\Users\bradw\OneDrive - Staffordshire University\Pacman\Pacman\Player.cpp(218,28): warning C4244: '=': conversion from 'int' to 'float', possible loss of data
-C:\Users\bradw\OneDrive - Staffordshire University\Pacman\Pacman\Player.cpp(222,28): warning C4244: '=': conversion from 'int' to 'float', possible loss of data
-C:\Users\bradw\OneDrive - Staffordshire University\Pacman\Pacman\Player.cpp(239,51): warning C4244: '=': conversion from 'int' to 'float', possible loss of data
-C:\Users\bradw\OneDrive - Staffordshire University\Pacman\Pacman\Player.cpp(240,50): warning C4244: '=': conversion from 'int' to 'float', possible loss of data
-  Pacman.vcxproj -> C:\Users\bradw\OneDrive - Staffordshire University\Pacman\Debug\Pacman.exe
+C:\Users\r011438m\Documents\GitHub\RobotronClone\Pacman\Pacman\S2D\Input.h(108): message : see reference to class template instantiation 'std::vector<S2D::Input::Keys,std::allocator<S2D::Input::Keys>>' being compiled
+  Player.cpp
+C:\Program Files\Microsoft Visual Studio\2022\Professional\VC\Tools\MSVC\14.32.31326\include\vector(2045,41): warning C4251: 'std::vector<S2D::Input::Keys,std::allocator<S2D::Input::Keys>>::_Mypair': class 'std::_Compressed_pair<std::allocator<S2D::Input::Keys>,std::_Vector_val<std::_Simple_types<_Ty>>,true>' needs to have dll-interface to be used by clients of class 'std::vector<S2D::Input::Keys,std::allocator<S2D::Input::Keys>>'
+          with
+          [
+              _Ty=S2D::Input::Keys
+          ]
+C:\Program Files\Microsoft Visual Studio\2022\Professional\VC\Tools\MSVC\14.32.31326\include\vector(2045): message : see declaration of 'std::_Compressed_pair<std::allocator<S2D::Input::Keys>,std::_Vector_val<std::_Simple_types<_Ty>>,true>'
+          with
+          [
+              _Ty=S2D::Input::Keys
+          ]
+C:\Users\r011438m\Documents\GitHub\RobotronClone\Pacman\Pacman\S2D\Input.h(108): message : see reference to class template instantiation 'std::vector<S2D::Input::Keys,std::allocator<S2D::Input::Keys>>' being compiled
+C:\Users\r011438m\Documents\GitHub\RobotronClone\Pacman\Pacman\Player.cpp(65,108): warning C4244: 'argument': conversion from 'float' to 'int', possible loss of data
+C:\Users\r011438m\Documents\GitHub\RobotronClone\Pacman\Pacman\Player.cpp(65,70): warning C4244: 'argument': conversion from 'float' to 'int', possible loss of data
+C:\Users\r011438m\Documents\GitHub\RobotronClone\Pacman\Pacman\Player.cpp(214,28): warning C4244: '=': conversion from 'int' to 'float', possible loss of data
+C:\Users\r011438m\Documents\GitHub\RobotronClone\Pacman\Pacman\Player.cpp(218,29): warning C4244: '=': conversion from 'int' to 'float', possible loss of data
+C:\Users\r011438m\Documents\GitHub\RobotronClone\Pacman\Pacman\Player.cpp(222,28): warning C4244: '=': conversion from 'int' to 'float', possible loss of data
+C:\Users\r011438m\Documents\GitHub\RobotronClone\Pacman\Pacman\Player.cpp(226,28): warning C4244: '=': conversion from 'int' to 'float', possible loss of data
+C:\Users\r011438m\Documents\GitHub\RobotronClone\Pacman\Pacman\Player.cpp(243,51): warning C4244: '=': conversion from 'int' to 'float', possible loss of data
+C:\Users\r011438m\Documents\GitHub\RobotronClone\Pacman\Pacman\Player.cpp(244,50): warning C4244: '=': conversion from 'int' to 'float', possible loss of data
+  Generating Code...
+  Pacman.vcxproj -> C:\Users\r011438m\Documents\GitHub\RobotronClone\Pacman\Debug\Pacman.exe

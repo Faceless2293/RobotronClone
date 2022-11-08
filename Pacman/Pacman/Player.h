@@ -20,7 +20,7 @@ using namespace S2D;
 class Player : public Game
 {
 private:
-	// Data to represent Pacman
+	// Data to represent Player
 	Vector2* _playerPosition;
 	Rect* _playerSourceRect;
 	Texture2D* _playerTexture;
@@ -50,19 +50,29 @@ private:
 	Vector2* _startStringPosition;
 	bool _started;
 
-	// Data to represent Munchie
+	// Data to represent Bullet
 	int _frameCount;
 	Rect* _bulletRect;
 	Texture2D* _bulletTexture;
+	Vector2* _bulletPosition;
 	int _bulletDirection;
-	float _bulletSpeed;
-	
+	const float _cBulletSpeed;
+
+	//Data to represent Enemy
+	struct enemy
+	{
+		Vector2* _enemyMainPosition;
+		Texture2D* _enemyTexture;
+		Rect* _enemySourceRect;
+		int _enemySpeed;
+		bool _isAlive;
+	};
 
 	// Position for String
 	Vector2* _stringPosition;
 
 	//Input method
-	void AttackInput();
+	void AttackInput(int elapsedTime);
 
 	//Check methods
 	void CheckPaused(Input::KeyboardState* state, Input::Keys pauseKey);
