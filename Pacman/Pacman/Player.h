@@ -1,3 +1,4 @@
+#define COINCOUNT 50
 #pragma once
 
 // If Windows and not in Debug, this will run without a console window
@@ -24,7 +25,6 @@ private:
 	Vector2* _playerPosition;
 	Rect* _playerSourceRect;
 	Texture2D* _playerTexture;
-	Texture2D* _playerWalkTexture;
 	int _playerSpriteTraversal;
 	int _playerFrame;
 	int _playerCurrentFrameTime;
@@ -44,7 +44,7 @@ private:
 	bool _paused;
 	bool _pKeyDown;
 
-	//Star Menu Variables
+	//Start Menu Variables
 	Texture2D* _startBackground;
 	Rect* _startRectangle;
 	Vector2* _startStringPosition;
@@ -59,14 +59,19 @@ private:
 	const float _cBulletSpeed;
 
 	//Data to represent Enemy
-	struct enemy
-	{
-		Vector2* _enemyMainPosition;
-		Texture2D* _enemyTexture;
-		Rect* _enemySourceRect;
-		int _enemySpeed;
-		bool _isAlive;
-	};
+	Vector2* _enemyPosition;
+	Texture2D* _enemyTexture;
+	Rect* _enemyRect;
+	float _enemySpeed;
+	int _enemyFrameCount;
+
+	//Civillian data
+	Texture2D* _civillianTexture;
+	Vector2* _civillianPosition;
+	Rect* _civillianRect;
+	float _civillianSpeed;
+	int _civillianFrameCount;
+
 
 	// Position for String
 	Vector2* _stringPosition;
@@ -81,6 +86,7 @@ private:
 	//Update methods
 	void UpdatePlayer(int elapsedTime);
 	void UpdateCoin(int elapsedTime);
+	void SpawnBullet();
 
 public:
 	/// <summary> Constructs the Pacman class. </summary>

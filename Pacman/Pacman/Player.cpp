@@ -4,14 +4,13 @@
 
 Player::Player(int argc, char* argv[]) : Game(argc, argv), _cPlayerSpeed(0.2f), _cPlayerFrameTime(250), _cBulletSpeed(100)
 {
-	_player = new player();
-	_player->_frame = 0;
+	// Initialise player attributes
 	_paused = false;
 	_started = true;
-	_player->currentFrameTime = 0;
-	_player->_frame = 0;
-	_player->_spriteTraversal = 0;
-	_player->_direction = 0;
+	_playerCurrentFrameTime = 0;
+	_playerFrame = 0;
+	_playerSpriteTraversal = 0;
+	_playerDirection = 0;
 
 	//Initialise important Game aspects
 	Graphics::Initialise(argc, argv, this, 1024, 768, false, 25, 25, "Pacman", 60);
@@ -23,8 +22,7 @@ Player::Player(int argc, char* argv[]) : Game(argc, argv), _cPlayerSpeed(0.2f), 
 
 Player::~Player()
 {
-	delete _player->texture;
-	delete _player->walkTexture;
+	delete _playerTexture;
 	delete _playerSourceRect;
 	delete _bulletTexture;
 	delete _bulletRect;
@@ -50,6 +48,17 @@ void Player::LoadContent()
 	_bulletTexture->Load("Textures/PlayerBullet.png", false);
 	_bulletRect = new Rect(0.0f, 0.0f, 32, 32);
 
+	//Load Civillian
+	_civillianTexture = new Texture2D();
+	_civillianTexture->Load("Textures/Civillian.png", false);
+	_civillianPosition = new Vector2(200.0f, 200.0f);
+	_civillianRect = new Rect(0.0f, 0.0f, 32, 32);
+
+	//Load Enemy
+	_enemyTexture = new Texture2D();
+	_enemyTexture->Load("Textures/Enemy.png", false);
+	_enemyPosition = new Vector2(200.0f, 100.0f);
+	_enemyRect = new Rect(0.0f, 0.0f, 64, 64);
 
 	// Set string position
 	_stringPosition = new Vector2(10.0f, 25.0f);
@@ -164,6 +173,8 @@ void Player::Draw(int elapsedTime)
 		SpriteBatch::DrawString(startStream.str().c_str(), _startStringPosition, Color::Green);
 	}
 	
+	//Draw Enemy
+	SpriteBatch::Draw(_enemyTexture, _enemyPosition, _enemyRect);
 
 	//Draw Bullet
 	if (_isShooting = true)
@@ -171,7 +182,8 @@ void Player::Draw(int elapsedTime)
 		SpriteBatch::Draw(_bulletTexture, _playerPosition, _bulletRect);
 	}
 
-	
+	//Draw Civillian
+	SpriteBatch::Draw(_civillianTexture, _civillianPosition, _civillianRect);
 
 	// Draws String
 	SpriteBatch::DrawString(stream.str().c_str(), _stringPosition, Color::Green);
@@ -195,12 +207,12 @@ void Player::AttackInput(int elapsedTime)
 	else if (keyboardState->IsKeyDown(Input::Keys::UP))
 	{
 		_isShooting = true;
-		_bulletPosition->Y += _cBulletSpeed * elapsedTime;
+		_bulletPosition->Y -= _cBulletSpeed * elapsedTime;
 	}
 	else if (keyboardState->IsKeyDown(Input::Keys::DOWN))
 	{
 		_isShooting = true;
-		_bulletPosition->Y -= _cBulletSpeed * elapsedTime;
+		_bulletPosition->Y += _cBulletSpeed * elapsedTime;
 	}
 }
 void Player::CheckPaused(Input::KeyboardState* state, Input::Keys pauseKey) 
