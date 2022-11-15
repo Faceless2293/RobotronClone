@@ -10,12 +10,12 @@ C:\Program Files\Microsoft Visual Studio\2022\Professional\VC\Tools\MSVC\14.32.3
               _Ty=S2D::Input::Keys
           ]
 C:\Users\r011438m\Documents\GitHub\RobotronClone\Pacman\Pacman\S2D\Input.h(108): message : see reference to class template instantiation 'std::vector<S2D::Input::Keys,std::allocator<S2D::Input::Keys>>' being compiled
-C:\Users\r011438m\Documents\GitHub\RobotronClone\Pacman\Pacman\Player.cpp(75,108): warning C4244: 'argument': conversion from 'float' to 'int', possible loss of data
-C:\Users\r011438m\Documents\GitHub\RobotronClone\Pacman\Pacman\Player.cpp(75,70): warning C4244: 'argument': conversion from 'float' to 'int', possible loss of data
-C:\Users\r011438m\Documents\GitHub\RobotronClone\Pacman\Pacman\Player.cpp(227,28): warning C4244: '=': conversion from 'int' to 'float', possible loss of data
-C:\Users\r011438m\Documents\GitHub\RobotronClone\Pacman\Pacman\Player.cpp(231,29): warning C4244: '=': conversion from 'int' to 'float', possible loss of data
-C:\Users\r011438m\Documents\GitHub\RobotronClone\Pacman\Pacman\Player.cpp(235,28): warning C4244: '=': conversion from 'int' to 'float', possible loss of data
-C:\Users\r011438m\Documents\GitHub\RobotronClone\Pacman\Pacman\Player.cpp(239,28): warning C4244: '=': conversion from 'int' to 'float', possible loss of data
-C:\Users\r011438m\Documents\GitHub\RobotronClone\Pacman\Pacman\Player.cpp(256,51): warning C4244: '=': conversion from 'int' to 'float', possible loss of data
-C:\Users\r011438m\Documents\GitHub\RobotronClone\Pacman\Pacman\Player.cpp(257,50): warning C4244: '=': conversion from 'int' to 'float', possible loss of data
+C:\Users\r011438m\Documents\GitHub\RobotronClone\Pacman\Pacman\Player.cpp(81,108): warning C4244: 'argument': conversion from 'float' to 'int', possible loss of data
+C:\Users\r011438m\Documents\GitHub\RobotronClone\Pacman\Pacman\Player.cpp(81,70): warning C4244: 'argument': conversion from 'float' to 'int', possible loss of data
+C:\Users\r011438m\Documents\GitHub\RobotronClone\Pacman\Pacman\Player.cpp(234,28): warning C4244: '=': conversion from 'int' to 'float', possible loss of data
+C:\Users\r011438m\Documents\GitHub\RobotronClone\Pacman\Pacman\Player.cpp(238,29): warning C4244: '=': conversion from 'int' to 'float', possible loss of data
+C:\Users\r011438m\Documents\GitHub\RobotronClone\Pacman\Pacman\Player.cpp(242,28): warning C4244: '=': conversion from 'int' to 'float', possible loss of data
+C:\Users\r011438m\Documents\GitHub\RobotronClone\Pacman\Pacman\Player.cpp(246,28): warning C4244: '=': conversion from 'int' to 'float', possible loss of data
+C:\Users\r011438m\Documents\GitHub\RobotronClone\Pacman\Pacman\Player.cpp(263,51): warning C4244: '=': conversion from 'int' to 'float', possible loss of data
+C:\Users\r011438m\Documents\GitHub\RobotronClone\Pacman\Pacman\Player.cpp(264,50): warning C4244: '=': conversion from 'int' to 'float', possible loss of data
   Pacman.vcxproj -> C:\Users\r011438m\Documents\GitHub\RobotronClone\Pacman\Debug\Pacman.exe

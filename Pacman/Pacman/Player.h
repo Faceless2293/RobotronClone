@@ -87,6 +87,7 @@ private:
 	void UpdatePlayer(int elapsedTime);
 	void UpdateCoin(int elapsedTime);
 	void SpawnBullet();
+	void EnemyMovement();
 
 public:
 	/// <summary> Constructs the Pacman class. </summary>

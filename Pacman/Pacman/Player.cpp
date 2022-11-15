@@ -32,6 +32,12 @@ Player::~Player()
 	delete _startBackground;
 	delete _startRectangle;
 	delete _startStringPosition;
+	delete _enemyTexture;
+	delete _enemyRect;
+	delete _enemyPosition;
+	delete _civillianTexture;
+	delete _civillianRect;
+	delete _civillianPosition;
 	
 }
 
@@ -120,6 +126,7 @@ void Player::Update(int elapsedTime)
 			}
 			CheckViewportCollision();
 			UpdatePlayer(elapsedTime);	
+			EnemyMovement();
 			
 		}
 	}
@@ -264,4 +271,12 @@ void Player::UpdateCoin(int elapsedTime)
 void Player::SpawnBullet() 
 {
 	
+}
+void Player::EnemyMovement() 
+{
+	_enemySpeed = 0.1f;
+	float targetX = _playerPosition->X - _enemyPosition->X;
+	float targetY = _playerPosition->Y - _enemyPosition->Y;
+	//float targetPath = (targetX * targetX + targetY * targetY);
+	_enemyPosition += (targetX * _enemySpeed, targetY * _enemySpeed);
 }
