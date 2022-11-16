@@ -90,43 +90,11 @@ void Player::Update(int elapsedTime)
 		if (!_paused)
 		{
 			
-			// Gets the current state of the keyboard
-			Input::KeyboardState* keyboardState = Input::Keyboard::GetState();
-
-			// Checks if D key is pressed
-			if (keyboardState->IsKeyDown(Input::Keys::D))
-			{
-				_playerPosition->X += _cPlayerSpeed * elapsedTime; //Moves Pacman across X axis
-				_playerSpriteTraversal = 2;
-				_isMoving = true;
-			}
-
-			// Checks if A key is pressed
-			else if (keyboardState->IsKeyDown(Input::Keys::A))
-			{
-				_playerPosition->X -= _cPlayerSpeed * elapsedTime; //Moves Pacman across X axis
-				_playerSpriteTraversal = 3;
-				_isMoving = true;
-			}
-
-			// Checks if W key is pressed
-			else if (keyboardState->IsKeyDown(Input::Keys::W))
-			{
-				_playerPosition->Y -= _cPlayerSpeed * elapsedTime; //Moves Pacman across Y axis
-				_playerSpriteTraversal = 1;
-				_isMoving = true;
-			}
-
-			// Checks if S key is pressed
-			else if (keyboardState->IsKeyDown(Input::Keys::S))
-			{
-				_playerPosition->Y += _cPlayerSpeed * elapsedTime; //Moves Pacman across Y axis
-				_playerSpriteTraversal = 0;
-				_isMoving = true;
-			}
+			PlayerMovement(elapsedTime);
 			CheckViewportCollision();
 			UpdatePlayer(elapsedTime);	
-			EnemyMovement();
+			EnemyMovement(elapsedTime);
+			CivillianMovement(elapsedTime);
 			
 		}
 	}
@@ -264,6 +232,43 @@ void Player::UpdatePlayer(int elapsedTime)
 	_playerSourceRect->X = _playerSourceRect->Width * _playerFrame;
 	_frameCount++;
 }
+void Player::PlayerMovement(int elapsedTime) 
+{
+	// Gets the current state of the keyboard
+	Input::KeyboardState* keyboardState = Input::Keyboard::GetState();
+
+	// Checks if D key is pressed
+	if (keyboardState->IsKeyDown(Input::Keys::D))
+	{
+		_playerPosition->X += _cPlayerSpeed * elapsedTime; //Moves Pacman across X axis
+		_playerSpriteTraversal = 2;
+		_isMoving = true;
+	}
+
+	// Checks if A key is pressed
+	else if (keyboardState->IsKeyDown(Input::Keys::A))
+	{
+		_playerPosition->X -= _cPlayerSpeed * elapsedTime; //Moves Pacman across X axis
+		_playerSpriteTraversal = 3;
+		_isMoving = true;
+	}
+
+	// Checks if W key is pressed
+	else if (keyboardState->IsKeyDown(Input::Keys::W))
+	{
+		_playerPosition->Y -= _cPlayerSpeed * elapsedTime; //Moves Pacman across Y axis
+		_playerSpriteTraversal = 1;
+		_isMoving = true;
+	}
+
+	// Checks if S key is pressed
+	else if (keyboardState->IsKeyDown(Input::Keys::S))
+	{
+		_playerPosition->Y += _cPlayerSpeed * elapsedTime; //Moves Pacman across Y axis
+		_playerSpriteTraversal = 0;
+		_isMoving = true;
+	}
+}
 void Player::UpdateCoin(int elapsedTime)
 {
 
@@ -272,11 +277,19 @@ void Player::SpawnBullet()
 {
 	
 }
-void Player::EnemyMovement() 
+void Player::EnemyMovement(int elapsedTime) 
 {
-	_enemySpeed = 0.1f;
+	_enemySpeed = 0.01f;
 	float targetX = _playerPosition->X - _enemyPosition->X;
 	float targetY = _playerPosition->Y - _enemyPosition->Y;
-	//float targetPath = (targetX * targetX + targetY * targetY);
-	_enemyPosition += (targetX * _enemySpeed, targetY * _enemySpeed);
+	_enemyPosition->X += targetX * _enemySpeed;
+	_enemyPosition->Y += targetY * _enemySpeed;
+}
+void Player::CivillianMovement(int elapsedTime) 
+{
+	_civillianSpeed = 0.02f;
+	float civillianTargetX = _civillianPosition->X - _enemyPosition->X;
+	float civillianTargetY = _civillianPosition->Y - _enemyPosition->Y;
+	_civillianPosition->X += civillianTargetX * _civillianSpeed * elapsedTime;
+	_civillianPosition->Y += civillianTargetY * _civillianSpeed * elapsedTime;
 }
