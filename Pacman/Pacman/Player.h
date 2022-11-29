@@ -57,6 +57,12 @@ private:
 	Vector2* _startStringPosition;
 	bool _started;
 
+	//Game Over Variables
+	Texture2D* _gameOverBackground;
+	Rect* _gameOverRect;
+	Vector2* _gameOverStringPosition;
+	
+
 	// Data to represent Bullet
 	int _frameCount;
 	Rect* _bulletRect;
@@ -77,12 +83,16 @@ private:
 	
 
 	//Civillian data
-	Texture2D* _civillianTexture;
-	Vector2* _civillianPosition;
-	Rect* _civillianRect;
-	float _civillianSpeed;
-	int _civillianFrameCount;
-	int _civillianDirection;
+	struct Civillian 
+	{
+		Texture2D* texture;
+		Vector2* position;
+		Rect* rect;
+		float speed;
+		int frameCount;
+		int direction;
+	};
+	
 
 	//Civillian Target
 	Vector2* _targetPosition;
@@ -94,6 +104,7 @@ private:
 	//structs 
 	Scientist* _player;
 	MovingEnemy* _enemy[ENEMYCOUNT];
+	Civillian* _civillian;
 
 	//Input method
 	void AttackInput(int elapsedTime);
@@ -101,13 +112,11 @@ private:
 	//Check methods
 	void CheckPaused(Input::KeyboardState* state, Input::Keys pauseKey);
 	void CheckViewportCollision();
+	void CheckCivillianViewportCollision();
 	void CheckEnemyCollision();
-	
-
 
 	//Update methods
 	void UpdatePlayer(int elapsedTime);
-	void UpdateCoin(int elapsedTime);
 	void PlayerMovement(int elapsedTime);
 	void SpawnBullet();
 	void EnemyMovement(MovingEnemy* _enemy, int elapsedTime);

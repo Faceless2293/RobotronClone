@@ -21,7 +21,8 @@ Player::Player(int argc, char* argv[]) : Game(argc, argv), _cPlayerSpeed(0.2f), 
 	_player->dead = false;
 
 	//Initialise Civillian attributes
-	_civillianDirection = 0;
+	_civillian = new Civillian();
+	_civillian->direction = 0;
 
 	//Initialise important Game aspects
 	Graphics::Initialise(argc, argv, this, 1024, 768, false, 25, 25, "Pacman", 60);
@@ -47,11 +48,15 @@ Player::~Player()
 	delete _enemy[0]->texture;
 	delete _enemy[0]->rect;
 	delete _enemy[0]->position;
-	delete _civillianTexture;
-	delete _civillianRect;
-	delete _civillianPosition;
+	delete _civillian;
+	delete _civillian->texture;
+	delete _civillian->rect;
+	delete _civillian->position;
 	delete _targetPosition;
 	delete _targetRect;
+	delete _gameOverBackground;
+	delete _gameOverRect;
+	delete _gameOverStringPosition;
 }
 
 void Player::LoadContent()
@@ -62,16 +67,16 @@ void Player::LoadContent()
 	_player->position = new Vector2(350.0f, 350.0f);
 	_player->sourceRect = new Rect(0.0f, 0.0f, 32, 32);
 
-	// Load Munchie
+	// Load Bullet
 	_bulletTexture = new Texture2D();
 	_bulletTexture->Load("Textures/PlayerBullet.png", false);
 	_bulletRect = new Rect(0.0f, 0.0f, 32, 32);
 
 	//Load Civillian
-	_civillianTexture = new Texture2D();
-	_civillianTexture->Load("Textures/Civillian.png", false);
-	_civillianPosition = new Vector2(200.0f, 200.0f);
-	_civillianRect = new Rect(0.0f, 0.0f, 32, 32);
+	_civillian->texture = new Texture2D();
+	_civillian->texture->Load("Textures/Civillian.png", false);
+	_civillian->position = new Vector2(200.0f, 200.0f);
+	_civillian->rect = new Rect(0.0f, 0.0f, 32, 32);
 
 	//Load Civillian Target
 	_targetPosition = new Vector2((rand() % Graphics::GetViewportWidth()), (rand() % Graphics::GetViewportHeight()));
@@ -97,6 +102,12 @@ void Player::LoadContent()
 	_startBackground->Load("Textures/Transparency.png", false);
 	_startRectangle = new Rect(0.0f, 0.0f, Graphics::GetViewportWidth() / 2.0f, Graphics::GetViewportHeight() / 2.0f);
 	_startStringPosition = new Vector2(Graphics::GetViewportWidth() / 2.0f, Graphics::GetViewportHeight() / 2.0f);
+	
+	//Set Game Over parameters
+	_gameOverBackground = new Texture2D();
+	_gameOverBackground->Load("Textures/Transparency.png", false);
+	_gameOverRect = new Rect(0.0f, 0.0f, Graphics::GetViewportWidth() / 2.0f, Graphics::GetViewportHeight() / 2.0f);
+	_gameOverStringPosition = new Vector2(Graphics::GetViewportWidth() / 2.0f, Graphics::GetViewportHeight() / 2.0f);
 }
 
 void Player::Update(int elapsedTime)
@@ -112,7 +123,7 @@ void Player::Update(int elapsedTime)
 			UpdatePlayer(elapsedTime);	
 			EnemyMovement(_enemy[0], elapsedTime);
 			CivillianMovement(elapsedTime);
-			//CheckEnemyCollision();
+			CheckEnemyCollision();
 			
 		}
 	}
@@ -165,6 +176,16 @@ void Player::Draw(int elapsedTime)
 		SpriteBatch::Draw(_startBackground, _startRectangle, nullptr);
 		SpriteBatch::DrawString(startStream.str().c_str(), _startStringPosition, Color::Green);
 	}
+
+	//Draw Game Over Screen
+	if (_player->dead == true) 
+	{
+		std::stringstream gameOverStream;
+		gameOverStream << "Game Over!";
+
+		SpriteBatch::Draw(_gameOverBackground, _gameOverRect, nullptr);
+		SpriteBatch::DrawString(gameOverStream.str().c_str(), _gameOverStringPosition, Color::Red);
+	}
 	
 	//Draw Enemy
 	for (int i = 0; i < ENEMYCOUNT; i++) 
@@ -180,7 +201,7 @@ void Player::Draw(int elapsedTime)
 	}
 
 	//Draw Civillian
-	SpriteBatch::Draw(_civillianTexture, _civillianPosition, _civillianRect);
+	SpriteBatch::Draw(_civillian->texture, _civillian->position, _civillian->rect);
 
 	// Draws String
 	SpriteBatch::DrawString(stream.str().c_str(), _stringPosition, Color::Green);
@@ -218,7 +239,7 @@ void Player::CheckPaused(Input::KeyboardState* state, Input::Keys pauseKey)
 }
 void Player::CheckViewportCollision() 
 {
-	// Wrap to other side of screen
+	// collide with viewport walls
 	if (_player->position->X + _player->sourceRect->Width >= Graphics::GetViewportWidth())
 	{
 		_player->position->X = Graphics::GetViewportWidth() - _player->sourceRect->Width;
@@ -291,10 +312,6 @@ void Player::PlayerMovement(int elapsedTime)
 		_player-> isMoving = true;
 	}
 }
-void Player::UpdateCoin(int elapsedTime)
-{
-
-}
 void Player::SpawnBullet() 
 {
 	
@@ -310,7 +327,7 @@ void Player::EnemyMovement(MovingEnemy* _enemy, int elapsedTime)
 }
 void Player::CivillianMovement(int elapsedTime) 
 {
-	_civillianSpeed = 0.01f;
+	_civillian->speed = 0.01f;
 	/*float civillianTargetX = _civillianPosition->X - _enemy[0]->position->X;
 	float civillianTargetY = _civillianPosition->Y - _enemy[0]->position->Y;
 	_civillianPosition->X += civillianTargetX * _civillianSpeed;
@@ -332,17 +349,36 @@ void Player::CivillianMovement(int elapsedTime)
 		_civillianDirection = 0;
 	}*/
 
-	float civillianTargetX = _civillianPosition->X + _targetPosition->X;
-	float civillianTargetY = _civillianPosition->Y + _targetPosition->Y;
-	_civillianPosition->X += civillianTargetX * _civillianSpeed;
-	_civillianPosition->Y += civillianTargetY * _civillianSpeed;
+	float civillianTargetX = _civillian->position->X + _targetPosition->X;
+	float civillianTargetY = _civillian->position->Y + _targetPosition->Y;
+	_civillian->position->X += civillianTargetX * _civillian->speed;
+	_civillian->position->Y += civillianTargetY * _civillian->speed;
 
-	if (_civillianPosition == _targetPosition) 
+	if (_civillian->position == _targetPosition) 
 	{
 		_targetPosition->X = (rand() % Graphics::GetViewportWidth());
 		_targetPosition->Y = (rand() % Graphics::GetViewportHeight());
 	}
 	
+}
+void Player::CheckCivillianViewportCollision() 
+{
+	if (_civillian->position->X + _civillian->rect->Width >= Graphics::GetViewportWidth())
+	{
+		_civillian->position->X = Graphics::GetViewportWidth() - _civillian->rect->Width;
+	}
+	if (_civillian->position->X + _civillian->rect->Width <= 0)
+	{
+		_civillian->position->X = 33 - _civillian->rect->Width;
+	}
+	if (_civillian->position->Y + _civillian->rect->Height >= Graphics::GetViewportHeight())
+	{
+		_civillian->position->Y = Graphics::GetViewportHeight() - _civillian->rect->Height;
+	}
+	if (_civillian->position->Y + _civillian->rect->Height <= 0)
+	{
+		_civillian->position->Y = 32 - _civillian->rect->Height;
+	}
 }
 void Player::CheckEnemyCollision() 
 {
@@ -365,11 +401,12 @@ void Player::CheckEnemyCollision()
 		right2 = _enemy[i]->position->X + _enemy[i]->rect->Width;
 		top2 = _enemy[i]->position->Y;
 
-		if ((bottom1 > top2) && (top1 < bottom2) && (right1 > left2) && (left1 < right2)) 
+		if ((bottom1 > top2) && (top1 < bottom2) && (right1 > left2) && (left1 < right2))
 		{
 			_player->dead = true;
 			i = ENEMYCOUNT;
 		}
+		
 	}
 
 
