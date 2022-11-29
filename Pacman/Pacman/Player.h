@@ -1,4 +1,5 @@
 #define COINCOUNT 50
+#define ENEMYCOUNT 5
 #pragma once
 
 // If Windows and not in Debug, this will run without a console window
@@ -21,16 +22,22 @@ using namespace S2D;
 class Player : public Game
 {
 private:
+	
 	// Data to represent Player
-	Vector2* _playerPosition;
-	Rect* _playerSourceRect;
-	Texture2D* _playerTexture;
-	int _playerSpriteTraversal;
-	int _playerFrame;
-	int _playerCurrentFrameTime;
-	unsigned char _playerDirection;
-	bool _isMoving = false;
-	bool _isShooting = false;
+	struct Scientist 
+	{
+		Vector2* position;
+		Rect* sourceRect;
+		Texture2D* texture;
+		int spriteTraversal;
+		int frame;
+		int currentFrameTime;
+		unsigned char direction;
+		bool isMoving = false;
+		bool isShooting = false;
+		bool dead;
+	};
+	
 
 
 	//constant value
@@ -59,11 +66,15 @@ private:
 	const float _cBulletSpeed;
 
 	//Data to represent Enemy
-	Vector2* _enemyPosition;
-	Texture2D* _enemyTexture;
-	Rect* _enemyRect;
-	float _enemySpeed;
-	int _enemyFrameCount;
+	struct MovingEnemy 
+	{
+		Vector2* position;
+		Texture2D* texture;
+		Rect* rect;
+		float speed;
+		int direction;
+	};
+	
 
 	//Civillian data
 	Texture2D* _civillianTexture;
@@ -71,10 +82,18 @@ private:
 	Rect* _civillianRect;
 	float _civillianSpeed;
 	int _civillianFrameCount;
+	int _civillianDirection;
 
+	//Civillian Target
+	Vector2* _targetPosition;
+	Rect* _targetRect;
 
 	// Position for String
 	Vector2* _stringPosition;
+
+	//structs 
+	Scientist* _player;
+	MovingEnemy* _enemy[ENEMYCOUNT];
 
 	//Input method
 	void AttackInput(int elapsedTime);
@@ -82,13 +101,16 @@ private:
 	//Check methods
 	void CheckPaused(Input::KeyboardState* state, Input::Keys pauseKey);
 	void CheckViewportCollision();
+	void CheckEnemyCollision();
+	
+
 
 	//Update methods
 	void UpdatePlayer(int elapsedTime);
 	void UpdateCoin(int elapsedTime);
 	void PlayerMovement(int elapsedTime);
 	void SpawnBullet();
-	void EnemyMovement(int elapsedTime);
+	void EnemyMovement(MovingEnemy* _enemy, int elapsedTime);
 	void CivillianMovement(int elapsedTime);
 
 public:

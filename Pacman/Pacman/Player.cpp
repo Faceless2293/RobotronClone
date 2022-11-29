@@ -4,13 +4,24 @@
 
 Player::Player(int argc, char* argv[]) : Game(argc, argv), _cPlayerSpeed(0.2f), _cPlayerFrameTime(250), _cBulletSpeed(100)
 {
+	
+	//Initialise enemy attributes
+	_enemy[0] = new MovingEnemy();
+	_enemy[0]->direction = 0;
+	_enemy[0]->speed = 0.1f;
+
 	// Initialise player attributes
+	_player = new Scientist();
 	_paused = false;
 	_started = true;
-	_playerCurrentFrameTime = 0;
-	_playerFrame = 0;
-	_playerSpriteTraversal = 0;
-	_playerDirection = 0;
+	_player->currentFrameTime = 0;
+	_player->frame = 0;
+	_player->spriteTraversal = 0;
+	_player->direction = 0;
+	_player->dead = false;
+
+	//Initialise Civillian attributes
+	_civillianDirection = 0;
 
 	//Initialise important Game aspects
 	Graphics::Initialise(argc, argv, this, 1024, 768, false, 25, 25, "Pacman", 60);
@@ -22,8 +33,9 @@ Player::Player(int argc, char* argv[]) : Game(argc, argv), _cPlayerSpeed(0.2f), 
 
 Player::~Player()
 {
-	delete _playerTexture;
-	delete _playerSourceRect;
+	delete _player->texture;
+	delete _player->sourceRect;
+	delete _player;
 	delete _bulletTexture;
 	delete _bulletRect;
 	delete _menuBackground;
@@ -32,22 +44,23 @@ Player::~Player()
 	delete _startBackground;
 	delete _startRectangle;
 	delete _startStringPosition;
-	delete _enemyTexture;
-	delete _enemyRect;
-	delete _enemyPosition;
+	delete _enemy[0]->texture;
+	delete _enemy[0]->rect;
+	delete _enemy[0]->position;
 	delete _civillianTexture;
 	delete _civillianRect;
 	delete _civillianPosition;
-	
+	delete _targetPosition;
+	delete _targetRect;
 }
 
 void Player::LoadContent()
 {
 	// Load Pacman
-	_playerTexture = new Texture2D();
-	_playerTexture->Load("Textures/Player.png", false);
-	_playerPosition = new Vector2(350.0f, 350.0f);
-	_playerSourceRect = new Rect(0.0f, 0.0f, 32, 32);
+	_player->texture = new Texture2D();
+	_player->texture->Load("Textures/Player.png", false);
+	_player->position = new Vector2(350.0f, 350.0f);
+	_player->sourceRect = new Rect(0.0f, 0.0f, 32, 32);
 
 	// Load Munchie
 	_bulletTexture = new Texture2D();
@@ -60,11 +73,15 @@ void Player::LoadContent()
 	_civillianPosition = new Vector2(200.0f, 200.0f);
 	_civillianRect = new Rect(0.0f, 0.0f, 32, 32);
 
+	//Load Civillian Target
+	_targetPosition = new Vector2((rand() % Graphics::GetViewportWidth()), (rand() % Graphics::GetViewportHeight()));
+	_targetRect = new Rect(0.0f, 0.0f, 32, 32);
+
 	//Load Enemy
-	_enemyTexture = new Texture2D();
-	_enemyTexture->Load("Textures/Enemy.png", false);
-	_enemyPosition = new Vector2(200.0f, 100.0f);
-	_enemyRect = new Rect(0.0f, 0.0f, 64, 64);
+	_enemy[0]->texture = new Texture2D();
+	_enemy[0]->texture->Load("Textures/Enemy.png", false);
+	_enemy[0]->position = new Vector2((rand()% Graphics::GetViewportWidth()), (rand()%Graphics::GetViewportHeight()));
+	_enemy[0]->rect = new Rect(0.0f, 0.0f, 64, 64);
 
 	// Set string position
 	_stringPosition = new Vector2(10.0f, 25.0f);
@@ -93,8 +110,9 @@ void Player::Update(int elapsedTime)
 			PlayerMovement(elapsedTime);
 			CheckViewportCollision();
 			UpdatePlayer(elapsedTime);	
-			EnemyMovement(elapsedTime);
+			EnemyMovement(_enemy[0], elapsedTime);
 			CivillianMovement(elapsedTime);
+			//CheckEnemyCollision();
 			
 		}
 	}
@@ -123,10 +141,10 @@ void Player::Draw(int elapsedTime)
 {
 	// Allows us to easily create a string
 	std::stringstream stream;
-	stream << "Player X: " << _playerPosition->X << " Y: " << _playerPosition->Y;
+	stream << "Player X: " << _player->position->X << " Y: " << _player->position->Y;
 
 	SpriteBatch::BeginDraw(); // Starts Drawing
-	SpriteBatch::Draw(_playerTexture, _playerPosition, _playerSourceRect); // Draws Pacman
+	SpriteBatch::Draw(_player->texture, _player->position, _player->sourceRect); // Draws Pacman
 
 		//Draw Pause Menu
 	if (_paused) 
@@ -149,12 +167,16 @@ void Player::Draw(int elapsedTime)
 	}
 	
 	//Draw Enemy
-	SpriteBatch::Draw(_enemyTexture, _enemyPosition, _enemyRect);
+	for (int i = 0; i < ENEMYCOUNT; i++) 
+	{
+		SpriteBatch::Draw(_enemy[0]->texture, _enemy[0]->position, _enemy[0]->rect);
+	}
+	
 
 	//Draw Bullet
-	if (_isShooting = true)
+	if (_player-> isShooting = true)
 	{
-		SpriteBatch::Draw(_bulletTexture, _playerPosition, _bulletRect);
+		SpriteBatch::Draw(_bulletTexture, _player->position, _bulletRect);
 	}
 
 	//Draw Civillian
@@ -171,22 +193,22 @@ void Player::AttackInput(int elapsedTime)
 	//check for input
 	if (keyboardState->IsKeyDown(Input::Keys::LEFT)) 
 	{
-		_isShooting = true;
+		_player-> isShooting = true;
 		_bulletPosition->X -= _cBulletSpeed * elapsedTime;
 	}
 	else if (keyboardState->IsKeyDown(Input::Keys::RIGHT)) 
 	{
-		_isShooting = true;
+		_player-> isShooting = true;
 		_bulletPosition->X += _cBulletSpeed * elapsedTime;
 	}
 	else if (keyboardState->IsKeyDown(Input::Keys::UP))
 	{
-		_isShooting = true;
+		_player-> isShooting = true;
 		_bulletPosition->Y -= _cBulletSpeed * elapsedTime;
 	}
 	else if (keyboardState->IsKeyDown(Input::Keys::DOWN))
 	{
-		_isShooting = true;
+		_player-> isShooting = true;
 		_bulletPosition->Y += _cBulletSpeed * elapsedTime;
 	}
 }
@@ -197,39 +219,39 @@ void Player::CheckPaused(Input::KeyboardState* state, Input::Keys pauseKey)
 void Player::CheckViewportCollision() 
 {
 	// Wrap to other side of screen
-	if (_playerPosition->X + _playerSourceRect->Width > Graphics::GetViewportWidth())
+	if (_player->position->X + _player->sourceRect->Width > Graphics::GetViewportWidth())
 	{
-		_playerPosition->X = -50 + _playerSourceRect->Width;
+		_player->position->X = -32 + _player->sourceRect->Width;
 	}
-	if (_playerPosition->X + _playerSourceRect->Width < -32)
+	if (_player->position->X + _player->sourceRect->Width < -32)
 	{
-		_playerPosition->X = 1024 - _playerSourceRect->Width;
+		_player->position->X = 1024 - _player->sourceRect->Width;
 	}
-	if (_playerPosition->Y + _playerSourceRect->Width > Graphics::GetViewportHeight())
+	if (_player->position->Y + _player->sourceRect->Width > Graphics::GetViewportHeight())
 	{
-		_playerPosition->Y = -50 + _playerSourceRect->Width;
+		_player->position->Y = Graphics::GetViewportHeight() + _player->sourceRect->Width;
 	}
-	if (_playerPosition->Y + _playerSourceRect->Width < -32)
+	if (_player->position->Y + _player->sourceRect->Width < -32)
 	{
-		_playerPosition->Y = 768 - _playerSourceRect->Width;
+		_player->position->Y = 768 - _player->sourceRect->Width;
 	}
 }
 void Player::UpdatePlayer(int elapsedTime) 
 {
 	//Frame Check
-	if (_playerCurrentFrameTime > _cPlayerFrameTime)
+	if (_player->currentFrameTime > _cPlayerFrameTime)
 	{
-		_playerFrame++;
-		if (_playerFrame >= 4)
+		_player->frame++;
+		if (_player->frame >= 4)
 		{
-			_playerFrame = 0;
+			_player->frame = 0;
 		}
-		_playerCurrentFrameTime = 0;
+		_player->currentFrameTime = 0;
 	}
 
 	//Traverses the sprite sheet when direcitons are input
-	_playerSourceRect->Y = _playerSourceRect->Height * _playerSpriteTraversal;
-	_playerSourceRect->X = _playerSourceRect->Width * _playerFrame;
+	_player->sourceRect->Y = _player->sourceRect->Height * _player->spriteTraversal;
+	_player->sourceRect->X = _player->sourceRect->Width * _player->frame;
 	_frameCount++;
 }
 void Player::PlayerMovement(int elapsedTime) 
@@ -240,33 +262,33 @@ void Player::PlayerMovement(int elapsedTime)
 	// Checks if D key is pressed
 	if (keyboardState->IsKeyDown(Input::Keys::D))
 	{
-		_playerPosition->X += _cPlayerSpeed * elapsedTime; //Moves Pacman across X axis
-		_playerSpriteTraversal = 2;
-		_isMoving = true;
+		_player->position->X += _cPlayerSpeed * elapsedTime; //Moves Pacman across X axis
+		_player->spriteTraversal = 2;
+		_player-> isMoving = true;
 	}
 
 	// Checks if A key is pressed
 	else if (keyboardState->IsKeyDown(Input::Keys::A))
 	{
-		_playerPosition->X -= _cPlayerSpeed * elapsedTime; //Moves Pacman across X axis
-		_playerSpriteTraversal = 3;
-		_isMoving = true;
+		_player->position->X -= _cPlayerSpeed * elapsedTime; //Moves Pacman across X axis
+		_player->spriteTraversal = 3;
+		_player-> isMoving = true;
 	}
 
 	// Checks if W key is pressed
 	else if (keyboardState->IsKeyDown(Input::Keys::W))
 	{
-		_playerPosition->Y -= _cPlayerSpeed * elapsedTime; //Moves Pacman across Y axis
-		_playerSpriteTraversal = 1;
-		_isMoving = true;
+		_player->position->Y -= _cPlayerSpeed * elapsedTime; //Moves Pacman across Y axis
+		_player->spriteTraversal = 1;
+		_player-> isMoving = true;
 	}
 
 	// Checks if S key is pressed
 	else if (keyboardState->IsKeyDown(Input::Keys::S))
 	{
-		_playerPosition->Y += _cPlayerSpeed * elapsedTime; //Moves Pacman across Y axis
-		_playerSpriteTraversal = 0;
-		_isMoving = true;
+		_player->position->Y += _cPlayerSpeed * elapsedTime; //Moves Pacman across Y axis
+		_player->spriteTraversal = 0;
+		_player-> isMoving = true;
 	}
 }
 void Player::UpdateCoin(int elapsedTime)
@@ -277,19 +299,71 @@ void Player::SpawnBullet()
 {
 	
 }
-void Player::EnemyMovement(int elapsedTime) 
+void Player::EnemyMovement(MovingEnemy* _enemy, int elapsedTime) 
 {
-	_enemySpeed = 0.01f;
-	float targetX = _playerPosition->X - _enemyPosition->X;
-	float targetY = _playerPosition->Y - _enemyPosition->Y;
-	_enemyPosition->X += targetX * _enemySpeed;
-	_enemyPosition->Y += targetY * _enemySpeed;
+	_enemy->speed = 0.01f;
+	float targetX = _player->position->X - _enemy->position->X;
+	float targetY = _player->position->Y - _enemy->position->Y;
+	_enemy->position->X += targetX * _enemy->speed;
+	_enemy->position->Y += targetY * _enemy->speed;
+	
 }
 void Player::CivillianMovement(int elapsedTime) 
 {
-	_civillianSpeed = 0.02f;
-	float civillianTargetX = _civillianPosition->X - _enemyPosition->X;
-	float civillianTargetY = _civillianPosition->Y - _enemyPosition->Y;
-	_civillianPosition->X += civillianTargetX * _civillianSpeed * elapsedTime;
-	_civillianPosition->Y += civillianTargetY * _civillianSpeed * elapsedTime;
+	_civillianSpeed = 0.01f;
+	/*float civillianTargetX = _civillianPosition->X - _enemy[0]->position->X;
+	float civillianTargetY = _civillianPosition->Y - _enemy[0]->position->Y;
+	_civillianPosition->X += civillianTargetX * _civillianSpeed;
+	_civillianPosition->Y += civillianTargetY * _civillianSpeed;
+	if (_civillianDirection == 0)
+	{
+		_civillianPosition->X += _civillianSpeed * elapsedTime;
+	}
+	else if (_civillianDirection == 1)
+	{
+		_civillianPosition->X -= _civillianSpeed * elapsedTime;
+	}
+	if (_civillianPosition->X + _civillianRect->Width >= Graphics::GetViewportWidth() && _civillianDirection == 0) 
+	{
+		_civillianDirection = 1;
+	}
+	else if (_civillianPosition->X <= 0) 
+	{
+		_civillianDirection = 0;
+	}*/
+
+	float civillianTargetX = _civillianPosition->X + _targetPosition->X;
+	float civillianTargetY = _civillianPosition->Y + _targetPosition->Y;
+	_civillianPosition->X += civillianTargetX * _civillianSpeed;
+	_civillianPosition->Y += civillianTargetY * _civillianSpeed;
+}
+void Player::CheckEnemyCollision() 
+{
+	//Local variables
+	int i = 0;
+	int bottom1 = _player->position->Y + _player->sourceRect->Height;
+	int bottom2 = 0;
+	int left1 = _player->position->X;
+	int left2 = 0;
+	int right1 = _player->position->X + _player->sourceRect->Width;
+	int right2 = 0;
+	int top1 = _player->position->Y;
+	int top2 = 0;
+
+	for (i = 0; i < ENEMYCOUNT; i++) 
+	{
+		//Populate variables with enemy data
+		bottom2 = _enemy[i]->position->Y + _enemy[i]->rect->Height;
+		left2 = _enemy[i]->position->X;
+		right2 = _enemy[i]->position->X + _enemy[i]->rect->Width;
+		top2 = _enemy[i]->position->Y;
+
+		if ((bottom1 > top2) && (top1 < bottom2) && (right1 > left2) && (left1 < right2)) 
+		{
+			_player->dead = true;
+			i = ENEMYCOUNT;
+		}
+	}
+
+
 }
