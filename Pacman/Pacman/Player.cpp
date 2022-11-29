@@ -219,21 +219,21 @@ void Player::CheckPaused(Input::KeyboardState* state, Input::Keys pauseKey)
 void Player::CheckViewportCollision() 
 {
 	// Wrap to other side of screen
-	if (_player->position->X + _player->sourceRect->Width > Graphics::GetViewportWidth())
+	if (_player->position->X + _player->sourceRect->Width >= Graphics::GetViewportWidth())
 	{
-		_player->position->X = -32 + _player->sourceRect->Width;
+		_player->position->X = Graphics::GetViewportWidth() - _player->sourceRect->Width;
 	}
-	if (_player->position->X + _player->sourceRect->Width < -32)
+	if (_player->position->X + _player->sourceRect->Width <= 0)
 	{
-		_player->position->X = 1024 - _player->sourceRect->Width;
+		_player->position->X = 33 - _player->sourceRect->Width;
 	}
-	if (_player->position->Y + _player->sourceRect->Width > Graphics::GetViewportHeight())
+	if (_player->position->Y + _player->sourceRect->Height >= Graphics::GetViewportHeight())
 	{
-		_player->position->Y = Graphics::GetViewportHeight() + _player->sourceRect->Width;
+		_player->position->Y = Graphics::GetViewportHeight() - _player->sourceRect->Height;
 	}
-	if (_player->position->Y + _player->sourceRect->Width < -32)
+	if (_player->position->Y + _player->sourceRect->Height <= 0)
 	{
-		_player->position->Y = 768 - _player->sourceRect->Width;
+		_player->position->Y = 32 - _player->sourceRect->Height;
 	}
 }
 void Player::UpdatePlayer(int elapsedTime) 
@@ -336,6 +336,13 @@ void Player::CivillianMovement(int elapsedTime)
 	float civillianTargetY = _civillianPosition->Y + _targetPosition->Y;
 	_civillianPosition->X += civillianTargetX * _civillianSpeed;
 	_civillianPosition->Y += civillianTargetY * _civillianSpeed;
+
+	if (_civillianPosition == _targetPosition) 
+	{
+		_targetPosition->X = (rand() % Graphics::GetViewportWidth());
+		_targetPosition->Y = (rand() % Graphics::GetViewportHeight());
+	}
+	
 }
 void Player::CheckEnemyCollision() 
 {
