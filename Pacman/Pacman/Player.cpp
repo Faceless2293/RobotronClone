@@ -6,9 +6,9 @@ Player::Player(int argc, char* argv[]) : Game(argc, argv), _cPlayerSpeed(0.2f), 
 {
 	
 	//Initialise enemy attributes
-	_enemy[0] = new MovingEnemy();
-	_enemy[0]->direction = 0;
-	_enemy[0]->speed = 0.1f;
+	_enemy = new MovingEnemy();
+	_enemy->direction = 0;
+	_enemy->speed = 0.1f;
 
 	// Initialise player attributes
 	_player = new Scientist();
@@ -45,9 +45,9 @@ Player::~Player()
 	delete _startBackground;
 	delete _startRectangle;
 	delete _startStringPosition;
-	delete _enemy[0]->texture;
-	delete _enemy[0]->rect;
-	delete _enemy[0]->position;
+	delete _enemy->texture;
+	delete _enemy->rect;
+	delete _enemy->position;
 	delete _civillian;
 	delete _civillian->texture;
 	delete _civillian->rect;
@@ -83,10 +83,10 @@ void Player::LoadContent()
 	_targetRect = new Rect(0.0f, 0.0f, 32, 32);
 
 	//Load Enemy
-	_enemy[0]->texture = new Texture2D();
-	_enemy[0]->texture->Load("Textures/Enemy.png", false);
-	_enemy[0]->position = new Vector2((rand()% Graphics::GetViewportWidth()), (rand()%Graphics::GetViewportHeight()));
-	_enemy[0]->rect = new Rect(0.0f, 0.0f, 64, 64);
+	_enemy->texture = new Texture2D();
+	_enemy->texture->Load("Textures/Enemy.png", false);
+	_enemy->position = new Vector2((rand()% Graphics::GetViewportWidth()), (rand()%Graphics::GetViewportHeight()));
+	_enemy->rect = new Rect(0.0f, 0.0f, 64, 64);
 
 	// Set string position
 	_stringPosition = new Vector2(10.0f, 25.0f);
@@ -121,9 +121,18 @@ void Player::Update(int elapsedTime)
 			PlayerMovement(elapsedTime);
 			CheckViewportCollision();
 			UpdatePlayer(elapsedTime);	
-			EnemyMovement(_enemy[0], elapsedTime);
+			EnemyMovement(_enemy, elapsedTime);
 			CivillianMovement(elapsedTime);
-			CheckEnemyCollision();
+			
+			
+			if (CheckCollision(_player->position->X, _player->position->Y, _player->sourceRect->Width, _player->sourceRect->Height,
+					_enemy->position->X, _enemy->position->Y, _enemy->rect->Width, _enemy->rect->Height)) 
+			{
+				_player->position->X = 10000;
+				_player->position->Y = 10000;
+				_player->dead = true;
+			}
+			
 			
 		}
 	}
@@ -188,10 +197,9 @@ void Player::Draw(int elapsedTime)
 	}
 	
 	//Draw Enemy
-	for (int i = 0; i < ENEMYCOUNT; i++) 
-	{
-		SpriteBatch::Draw(_enemy[0]->texture, _enemy[0]->position, _enemy[0]->rect);
-	}
+	
+	SpriteBatch::Draw(_enemy->texture, _enemy->position, _enemy->rect);
+	
 	
 
 	//Draw Bullet
@@ -380,34 +388,29 @@ void Player::CheckCivillianViewportCollision()
 		_civillian->position->Y = 32 - _civillian->rect->Height;
 	}
 }
-void Player::CheckEnemyCollision() 
+bool Player::CheckCollision(int x1, int y1, int width1, int height1, int x2, int y2, int width2, int height2) 
 {
-	//Local variables
-	int i = 0;
-	int bottom1 = _player->position->Y + _player->sourceRect->Height;
-	int bottom2 = 0;
-	int left1 = _player->position->X;
-	int left2 = 0;
-	int right1 = _player->position->X + _player->sourceRect->Width;
-	int right2 = 0;
-	int top1 = _player->position->Y;
-	int top2 = 0;
+	//declaration of function variables
+	int left1 = x1;
+	int left2 = x2;
+	int right1 = x1 + width1;
+	int right2 = x2 + width2;
+	int top1 = y1;
+	int top2 = y2;
+	int bottom1 = y1 + height1;
+	int bottom2 = y2 + height2;
 
-	for (i = 0; i < ENEMYCOUNT; i++) 
-	{
-		//Populate variables with enemy data
-		bottom2 = _enemy[i]->position->Y + _enemy[i]->rect->Height;
-		left2 = _enemy[i]->position->X;
-		right2 = _enemy[i]->position->X + _enemy[i]->rect->Width;
-		top2 = _enemy[i]->position->Y;
-
-		if ((bottom1 > top2) && (top1 < bottom2) && (right1 > left2) && (left1 < right2))
-		{
-			_player->dead = true;
-			i = ENEMYCOUNT;
-		}
-		
-	}
-
+	//collision check
+	if (bottom1 < top2)
+		return false;
+	if (top1 > bottom2)
+		return false;
+	if (right1 < left2)
+		return false;
+	if (left1 > right2)
+		return false;
+	else
+		return true;
 
 }
+
