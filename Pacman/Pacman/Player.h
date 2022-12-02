@@ -36,12 +36,12 @@ private:
 		bool isShooting = false;
 		bool dead;
 	};
-	
-
 
 	//constant value
 	const float _cPlayerSpeed;
 	const int _cPlayerFrameTime;
+	const int _cEnemyFrameTime;
+	const int _cCivillianFrameTime;
 
 	//Pause Menu Variables
 	Texture2D* _menuBackground;
@@ -63,12 +63,15 @@ private:
 	
 
 	// Data to represent Bullet
-	int _frameCount;
-	Rect* _bulletRect;
-	Texture2D* _bulletTexture;
-	Vector2* _bulletPosition;
-	int _bulletDirection;
-	const float _cBulletSpeed;
+	struct Bullet 
+	{
+		Rect* rect;
+		Texture2D* texture;
+		Vector2* position;
+		int direction;
+		float speed;
+	};
+	
 
 	//Data to represent Enemy
 	struct MovingEnemy 
@@ -78,6 +81,8 @@ private:
 		Rect* rect;
 		float speed;
 		int direction;
+		int frame;
+		int currentFrameTime;
 	};
 	
 
@@ -88,7 +93,8 @@ private:
 		Vector2* position;
 		Rect* rect;
 		float speed;
-		int frameCount;
+		int frame;
+		int currentFrameTime;
 		int direction;
 	};
 	
@@ -104,6 +110,11 @@ private:
 	Scientist* _player;
 	MovingEnemy* _enemy;
 	Civillian* _civillian;
+	Bullet* _bullet;
+	
+	//Audio
+	SoundEffect* _oof;
+	SoundEffect* _powerUp;
 
 	//Input method
 	void AttackInput(int elapsedTime);
@@ -116,6 +127,8 @@ private:
 
 	//Update methods
 	void UpdatePlayer(int elapsedTime);
+	void UpdateEnemy(int elapsedTime);
+	void UpdateCivillian(int elapsedTime);
 	void PlayerMovement(int elapsedTime);
 	void SpawnBullet();
 	void EnemyMovement(MovingEnemy* _enemy, int elapsedTime);
