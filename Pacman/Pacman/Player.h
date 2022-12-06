@@ -46,6 +46,7 @@ private:
 	int initialScore;
 	int currentScore;
 	int scoreIncrease;
+
 	//Pause Menu Variables
 	Texture2D* _menuBackground;
 	Rect* _menuRectangle;
@@ -119,6 +120,7 @@ private:
 	SoundEffect* _oof;
 	SoundEffect* _powerUp;
 	SoundEffect* _ohNo;
+	SoundEffect* _background;
 
 	//Input method
 	void AttackInput(int elapsedTime);

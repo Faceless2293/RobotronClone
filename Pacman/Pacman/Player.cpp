@@ -45,6 +45,7 @@ Player::Player(int argc, char* argv[]) : Game(argc, argv), _cPlayerSpeed(0.2f), 
 	_oof = new SoundEffect();
 	_powerUp = new SoundEffect();
 	_ohNo = new SoundEffect();
+	_background = new SoundEffect();
 
 	//Initialise important Game aspects
 	Audio::Initialise();
@@ -96,6 +97,7 @@ Player::~Player()
 	delete _oof;
 	delete _powerUp;
 	delete _ohNo;
+	delete _background;
 }
 
 void Player::LoadContent()
@@ -156,6 +158,7 @@ void Player::LoadContent()
 	_oof->Load("Sounds/SadTrombone.wav");
 	_powerUp->Load("Sounds/PowerUp.wav");
 	_ohNo->Load("Sounds/OhNo.wav");
+	_background->Load("Sounds/BackgroundMusic.wav");
 }
 
 void Player::Update(int elapsedTime)
@@ -163,6 +166,7 @@ void Player::Update(int elapsedTime)
 
 	if (!_started)
 	{
+		Audio::Play(_background);
 		if (!_paused || !_player->dead)
 		{
 			
@@ -173,7 +177,7 @@ void Player::Update(int elapsedTime)
 			UpdateCivillian(elapsedTime);
 			UpdateEnemy(elapsedTime);
 			CheckViewportCollision();
-			//AttackInput(elapsedTime);
+			AttackInput(elapsedTime);
 			
 			
 			if (CheckCollision(_player->position->X, _player->position->Y, _player->sourceRect->Width, _player->sourceRect->Height,
@@ -183,7 +187,7 @@ void Player::Update(int elapsedTime)
 				_player->position->Y = 10000;
 				Audio::Play(_oof);
 				_player->dead = true;
-				
+				Audio::Stop(_background);				
 			}
 			if (CheckCollision(_player->position->X, _player->position->Y, _player->sourceRect->Width, _player->sourceRect->Height,
 				_civillian->position->X, _civillian->position->Y, _civillian->rect->Width, _civillian->rect->Height)) 
@@ -363,7 +367,7 @@ void Player::UpdatePlayer(int elapsedTime)
 
 	//Traverses the sprite sheet when direcitons are input
 	_player->sourceRect->Y = _player->sourceRect->Height * _player->spriteTraversal;
-	_player->sourceRect->X = _player->sourceRect->Width *  _player->frame;
+	_player->sourceRect->X = _player->sourceRect->Width *  _player->frame * elapsedTime;
 	_player->frame++;
 }
 void Player::PlayerMovement(int elapsedTime) 
@@ -401,6 +405,7 @@ void Player::PlayerMovement(int elapsedTime)
 }
 void Player::BulletMovement(int direction, int elapsedTime) 
 {
+	//Changes tragectory of the bullet depending on it's direction which is defined by which directional key is pressed
 	if (direction == 0) 
 	{
 		for (int i = 0; i < BULLETCOUNT; i++) 
@@ -433,6 +438,7 @@ void Player::BulletMovement(int direction, int elapsedTime)
 void Player::EnemyMovement(MovingEnemy* _enemy, int elapsedTime) 
 {
 	_enemy->speed = 0.01f;
+	//If the enemy is closer to the player then it will track the player
 	if ((_player->position->X - _enemy->position->X) && (_player->position->Y - _enemy->position->Y) < (_civillian->position->X - _enemy->position->X) && (_civillian->position->Y - _enemy->position->Y))
 	{
 		float targetX = _player->position->X - _enemy->position->X;
@@ -440,6 +446,7 @@ void Player::EnemyMovement(MovingEnemy* _enemy, int elapsedTime)
 		_enemy->position->X += targetX * _enemy->speed;
 		_enemy->position->Y += targetY * _enemy->speed;
 	}
+	//If the enemy is closer to the civillian then it will track the civillian
 	else if ((_player->position->X - _enemy->position->X) && (_player->position->Y - _enemy->position->Y) > (_civillian->position->X - _enemy->position->X) && (_civillian->position->Y - _enemy->position->Y))
 	{
 		float targetX = _civillian->position->X - _enemy->position->X;
@@ -447,6 +454,7 @@ void Player::EnemyMovement(MovingEnemy* _enemy, int elapsedTime)
 		_enemy->position->X += targetX * _enemy->speed;
 		_enemy->position->Y += targetY * _enemy->speed;
 	}
+	//track player by deafault
 	else 
 	{
 		float targetX = _player->position->X - _enemy->position->X;
@@ -470,7 +478,7 @@ void Player::UpdateEnemy(int elapsedTime)
 		_enemy->currentFrameTime = 0;
 	}
 
-	_enemy->rect->Y = _enemy->rect->Height * _enemy->direction * _enemy->frame;
+	_enemy->rect->X = _enemy->rect->Width * _enemy->frame * elapsedTime;
 	_enemy->frame++;
 }
 void Player::CivillianMovement(int elapsedTime) 
@@ -508,21 +516,6 @@ void Player::CivillianMovement(int elapsedTime)
 			_civillian->direction = (rand() % 4);
 		}
 	}
-	//Check bound and change direction
-	
-	/*else if (_civillian->position->Y <= 0)//hits left edge
-	{
-		_civillian->direction = (rand() % 4);
-	}
-	else if (_civillian->position->X >= Graphics::GetViewportWidth())//hits right wall
-	{
-		_civillian->direction = (rand() % 4);
-	}
-	else if (_civillian->position->X <= 0); //hits left wall
-	{
-		_civillian->direction = (rand() % 4);
-	}*/
-	
 }
 void Player::UpdateCivillian(int elapsedTime) 
 {
@@ -539,28 +532,10 @@ void Player::UpdateCivillian(int elapsedTime)
 
 	//Traverses the sprite sheet when direcitons are input
 	_civillian->rect->Y = _civillian->rect->Height * _civillian->direction;
-	_civillian->rect->X = _civillian->rect->Width * _civillian->frame;
+	_civillian->rect->X = _civillian->rect->Width * _civillian->frame * elapsedTime;
 	_civillian->frame++;
 }
-/*void Player::CheckCivillianViewportCollision()
-{
-	if (_civillian->position->X + _civillian->rect->Width >= Graphics::GetViewportWidth())
-	{
-		_civillian->position->X = Graphics::GetViewportWidth() - _civillian->rect->Width;
-	}
-	if (_civillian->position->X + _civillian->rect->Width <= 0)
-	{
-		_civillian->position->X = 33 - _civillian->rect->Width;
-	}
-	if (_civillian->position->Y + _civillian->rect->Height >= Graphics::GetViewportHeight())
-	{
-		_civillian->position->Y = Graphics::GetViewportHeight() - _civillian->rect->Height;
-	}
-	if (_civillian->position->Y + _civillian->rect->Height <= 0)
-	{
-		_civillian->position->Y = 32 - _civillian->rect->Height;
-	}
-}*/
+
 bool Player::CheckCollision(int x1, int y1, int width1, int height1, int x2, int y2, int width2, int height2) 
 {
 	//declaration of function variables
