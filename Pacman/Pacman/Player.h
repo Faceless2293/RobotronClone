@@ -1,4 +1,4 @@
-#define COINCOUNT 50
+#define BULLETCOUNT 50
 #pragma once
 
 // If Windows and not in Debug, this will run without a console window
@@ -32,8 +32,7 @@ private:
 		int frame;
 		int currentFrameTime;
 		unsigned char direction;
-		bool isMoving = false;
-		bool isShooting = false;
+		bool isShooting;
 		bool dead;
 	};
 
@@ -43,6 +42,10 @@ private:
 	const int _cEnemyFrameTime;
 	const int _cCivillianFrameTime;
 
+	//Score Values
+	int initialScore;
+	int currentScore;
+	int scoreIncrease;
 	//Pause Menu Variables
 	Texture2D* _menuBackground;
 	Rect* _menuRectangle;
@@ -110,14 +113,16 @@ private:
 	Scientist* _player;
 	MovingEnemy* _enemy;
 	Civillian* _civillian;
-	Bullet* _bullet;
+	Bullet* _bullet[BULLETCOUNT];
 	
 	//Audio
 	SoundEffect* _oof;
 	SoundEffect* _powerUp;
+	SoundEffect* _ohNo;
 
 	//Input method
 	void AttackInput(int elapsedTime);
+	void PlayerMovement(int elapsedTime);
 
 	//Check methods
 	void CheckPaused(Input::KeyboardState* state, Input::Keys pauseKey);
@@ -129,8 +134,7 @@ private:
 	void UpdatePlayer(int elapsedTime);
 	void UpdateEnemy(int elapsedTime);
 	void UpdateCivillian(int elapsedTime);
-	void PlayerMovement(int elapsedTime);
-	void SpawnBullet();
+	void BulletMovement(int direction, int elapsedTime);
 	void EnemyMovement(MovingEnemy* _enemy, int elapsedTime);
 	void CivillianMovement(int elapsedTime);
 
