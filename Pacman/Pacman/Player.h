@@ -1,5 +1,5 @@
-#define BULLETCOUNT 50
 #pragma once
+#define BULLETCOUNT 50
 
 // If Windows and not in Debug, this will run without a console window
 // You can use this to output information when debugging using cout or cerr
@@ -123,7 +123,7 @@ private:
 	SoundEffect* _background;
 
 	//Input method
-	void AttackInput(int elapsedTime);
+	void AttackInput(Bullet*, int elapsedTime);
 	void PlayerMovement(int elapsedTime);
 
 	//Check methods
@@ -131,12 +131,13 @@ private:
 	void CheckViewportCollision();
 	void CheckCivillianViewportCollision();
 	bool CheckCollision(int x1, int y1, int width1, int height1, int x2, int y2, int width2, int height2);
+	bool CheckObjectPosition(float objectPositionX, float objectPositionY);
 
 	//Update methods
 	void UpdatePlayer(int elapsedTime);
 	void UpdateEnemy(int elapsedTime);
 	void UpdateCivillian(int elapsedTime);
-	void BulletMovement(int direction, int elapsedTime);
+	void BulletMovement(Bullet*, int direction, int elapsedTime);
 	void EnemyMovement(MovingEnemy* _enemy, int elapsedTime);
 	void CivillianMovement(int elapsedTime);
 
