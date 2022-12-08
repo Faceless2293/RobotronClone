@@ -171,8 +171,6 @@ void Player::Update(int elapsedTime)
 			PlayerMovement(elapsedTime);
 			EnemyMovement(_enemy, elapsedTime);
 			CivillianMovement(elapsedTime);
-			//UpdatePlayer(elapsedTime);
-
 
 
 			for (int i = 0; i < BULLETCOUNT; i++)
