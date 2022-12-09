@@ -1,5 +1,6 @@
 #pragma once
 #define BULLETCOUNT 50
+#define ENEMYCOUNT 5
 
 // If Windows and not in Debug, this will run without a console window
 // You can use this to output information when debugging using cout or cerr
@@ -112,7 +113,7 @@ private:
 
 	//structs 
 	Scientist* _player;
-	MovingEnemy* _enemy;
+	MovingEnemy* _enemy[ENEMYCOUNT];
 	Civillian* _civillian;
 	Bullet* _bullet[BULLETCOUNT];
 	
@@ -135,7 +136,7 @@ private:
 
 	//Update methods
 	void UpdatePlayer(int elapsedTime);
-	void UpdateEnemy(int elapsedTime);
+	void UpdateEnemy(int enemyCurrentFrame, int enemyFrame, float enemyRectX, float enemyRectW, int elapsedTime);
 	void UpdateCivillian(int elapsedTime);
 	void BulletMovement(Bullet*, int direction, int elapsedTime);
 	void EnemyMovement(MovingEnemy* _enemy, int elapsedTime);

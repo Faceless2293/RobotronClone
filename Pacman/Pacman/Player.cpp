@@ -6,11 +6,15 @@ Player::Player(int argc, char* argv[]) : Game(argc, argv), _cPlayerSpeed(0.2f), 
 {
 	
 	//Initialise enemy attributes
-	_enemy = new MovingEnemy();
-	_enemy->direction = 0;
-	_enemy->speed = 0.1f;
-	_enemy->currentFrameTime = 0;
-	_enemy->frame = 0;
+	for (int i = 0; i < ENEMYCOUNT; i++) 
+	{
+		_enemy[i] = new MovingEnemy();
+		_enemy[i]->direction = 0;
+		_enemy[i]->speed = 0.1f;
+		_enemy[i]->currentFrameTime = 0;
+		_enemy[i]->frame = 0;
+	}
+	
 
 	// Initialise player attributes
 	_player = new Scientist();
@@ -65,12 +69,11 @@ Player::~Player()
 	delete _player;
 	//deleted bullet items
 	delete _bullet[0]->texture;
-	int nCount = 0;
-	for (nCount = 0; nCount < BULLETCOUNT; nCount++) 
+	for (int i  = 0; i < BULLETCOUNT; i++) 
 	{
-		delete _bullet[nCount]->position;
-		delete _bullet[nCount]->rect;
-		delete _bullet[nCount];
+		delete _bullet[i]->position;
+		delete _bullet[i]->rect;
+		delete _bullet[i];
 	}
 	delete [] &_bullet;
 	//deleted menu items
@@ -83,9 +86,13 @@ Player::~Player()
 	delete _gameOverBackground;
 	delete _gameOverRect;
 	//deleted enemy items
-	delete _enemy->texture;
-	delete _enemy->rect;
-	delete _enemy->position;
+	for (int i = 0; i < ENEMYCOUNT; i++) 
+	{
+		delete _enemy[i]->texture;
+		delete _enemy[i]->rect;
+		delete _enemy[i]->position;
+		delete _enemy[i];
+	}
 	//deleted civillian items
 	delete _civillian;
 	delete _civillian->texture;
@@ -113,6 +120,7 @@ void Player::LoadContent()
 	bulletTexture->Load("Textures/PlayerBullet.png", false);
 	for (int i = 0; i < BULLETCOUNT; i++) 
 	{
+		_bullet[i]->position = new Vector2(_player->position->X, _player->position->Y);
 		_bullet[i]->texture = bulletTexture;
 		_bullet[i]->rect = new Rect(0.0f, 0.0f, 32, 32);
 	}
@@ -129,10 +137,15 @@ void Player::LoadContent()
 	_targetRect = new Rect(0.0f, 0.0f, 32, 32);
 
 	//Load Enemy
-	_enemy->texture = new Texture2D();
-	_enemy->texture->Load("Textures/Enemy.png", false);
-	_enemy->position = new Vector2((rand()% Graphics::GetViewportWidth()), (rand()%Graphics::GetViewportHeight()));
-	_enemy->rect = new Rect(0.0f, 0.0f, 64, 64);
+	Texture2D* enemyTexture = new Texture2D();
+	enemyTexture->Load("Textures/Enemy.png", false);
+	for (int i = 0; i < ENEMYCOUNT; i++) 
+	{
+		_enemy[i]->position = new Vector2((rand() % Graphics::GetViewportWidth()), (rand() % Graphics::GetViewportHeight()));
+		_enemy[i]->texture = enemyTexture;
+		_enemy[i]->rect = new Rect(0.0f, 0.0f, 64, 64);
+	}
+	
 
 	// Set string position
 	_stringPosition = new Vector2(10.0f, 25.0f);
@@ -169,7 +182,11 @@ void Player::Update(int elapsedTime)
 		if (!_paused)
 		{
 			PlayerMovement(elapsedTime);
-			EnemyMovement(_enemy, elapsedTime);
+			for (int i = 0; i < ENEMYCOUNT; i++) 
+			{
+				EnemyMovement(_enemy[i], elapsedTime);
+				UpdateEnemy(_enemy[i]->currentFrameTime, _enemy[i]->frame, _enemy[i]->rect->X, _enemy[i]->rect->Width, elapsedTime);
+			}
 			CivillianMovement(elapsedTime);
 
 
@@ -184,16 +201,19 @@ void Player::Update(int elapsedTime)
 			
 			
 			
-			
-			if (CheckCollision(_player->position->X, _player->position->Y, _player->sourceRect->Width, _player->sourceRect->Height,
-					_enemy->position->X, _enemy->position->Y, _enemy->rect->Width, _enemy->rect->Height)) 
+			for (int i = 0; i < ENEMYCOUNT; i++) 
 			{
-				_player->position->X = 10000.0f;
-				_player->position->Y = 10000.0f;
-				Audio::Play(_oof);
-				_player->dead = true;
-				//Audio::Stop(_background);				
+				if (CheckCollision(_player->position->X, _player->position->Y, _player->sourceRect->Width, _player->sourceRect->Height,
+					_enemy[i]->position->X, _enemy[i]->position->Y, _enemy[i]->rect->Width, _enemy[i]->rect->Height))
+				{
+					_player->position->X = 10000.0f;
+					_player->position->Y = 10000.0f;
+					Audio::Play(_oof);
+					_player->dead = true;
+					//Audio::Stop(_background);				
+				}
 			}
+			
 			if (CheckCollision(_player->position->X, _player->position->Y, _player->sourceRect->Width, _player->sourceRect->Height,
 				_civillian->position->X, _civillian->position->Y, _civillian->rect->Width, _civillian->rect->Height)) 
 			{
@@ -202,13 +222,17 @@ void Player::Update(int elapsedTime)
 				Audio::Play(_powerUp);
 				currentScore += scoreIncrease;
 			}
-			if (CheckCollision(_civillian->position->X, _civillian->position->Y, _civillian->rect->Width, _civillian->rect->Height,
-				_enemy->position->X, _enemy->position->Y, _enemy->rect->Width, _enemy->rect->Height)) 
+			for (int i = 0; i < ENEMYCOUNT; i++) 
 			{
-				_civillian->position->X = 11000.0f;
-				_civillian->position->Y = 11000.0f;
-				Audio::Play(_ohNo);
+				if (CheckCollision(_civillian->position->X, _civillian->position->Y, _civillian->rect->Width, _civillian->rect->Height,
+					_enemy[i]->position->X, _enemy[i]->position->Y, _enemy[i]->rect->Width, _enemy[i]->rect->Height))
+				{
+					_civillian->position->X = 11000.0f;
+					_civillian->position->Y = 11000.0f;
+					Audio::Play(_ohNo);
+				}
 			}
+			
 			
 		}
 	}
@@ -269,8 +293,11 @@ void Player::Draw(int elapsedTime)
 	}
 	
 	//Draw Enemy
+	for (int i = 0; i < ENEMYCOUNT; i++) 
+	{
+		SpriteBatch::Draw(_enemy[i]->texture, _enemy[i]->position, _enemy[i]->rect);
+	}
 	
-	SpriteBatch::Draw(_enemy->texture, _enemy->position, _enemy->rect);
 	
 	
 
@@ -280,8 +307,7 @@ void Player::Draw(int elapsedTime)
 		for (int i = 0; i < BULLETCOUNT; i++) 
 		{
 			SpriteBatch::Draw(_bullet[i]->texture, _bullet[i]->position, _bullet[i]->rect);
-		}
-		
+		}	
 	}
 
 	//Draw Civillian
@@ -471,24 +497,22 @@ void Player::EnemyMovement(MovingEnemy* _enemy, int elapsedTime)
 		_enemy->position->X += targetX * _enemy->speed;
 		_enemy->position->Y += targetY * _enemy->speed;
 	}
-	UpdateEnemy(elapsedTime);
-	
 }
-void Player::UpdateEnemy(int elapsedTime) 
+void Player::UpdateEnemy(int enemyCurrentFrame, int enemyFrame, float enemyRectX, float enemyRectW, int elapsedTime)
 {
 	//Frame Check
-	if (_enemy->currentFrameTime > _cEnemyFrameTime)
+	if (enemyCurrentFrame > _cEnemyFrameTime)
 	{
-		_enemy->frame++;
-		if (_enemy->frame >= 5)
+		enemyFrame++;
+		if (enemyFrame >= 5)
 		{
-			_enemy->frame = 0;
+			enemyFrame = 0;
 		}
-		_enemy->currentFrameTime = 0;
+		enemyCurrentFrame = 0;
 	}
 
-	_enemy->rect->X = _enemy->rect->Width * _enemy->frame * elapsedTime;
-	_enemy->frame++;
+	enemyRectX = enemyRectW * enemyFrame * elapsedTime;
+	enemyFrame++;
 }
 void Player::CivillianMovement(int elapsedTime) 
 {
