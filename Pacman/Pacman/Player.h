@@ -1,6 +1,7 @@
 #pragma once
 #define BULLETCOUNT 50
 #define ENEMYCOUNT 5
+#define CIVILLIANCOUNT 5
 
 // If Windows and not in Debug, this will run without a console window
 // You can use this to output information when debugging using cout or cerr
@@ -42,6 +43,7 @@ private:
 	const int _cPlayerFrameTime;
 	const int _cEnemyFrameTime;
 	const int _cCivillianFrameTime;
+	const int _cLoadingFrameTime;
 
 	//Score Values
 	int initialScore;
@@ -61,10 +63,16 @@ private:
 	Vector2* _startStringPosition;
 	bool _started;
 
+	//Loading Screen
+	Texture2D* _loadingTexture;
+	Rect* _loadingRect;
+	bool _isLoading;
+	int _loadingCurrentFrameTime;
+	int _loadingFrame;
+
 	//Game Over Variables
 	Texture2D* _gameOverBackground;
 	Rect* _gameOverRect;
-	Vector2* _gameOverStringPosition;
 	
 
 	// Data to represent Bullet
@@ -88,6 +96,7 @@ private:
 		int direction;
 		int frame;
 		int currentFrameTime;
+		bool isDead;
 	};
 	
 
@@ -114,7 +123,7 @@ private:
 	//structs 
 	Scientist* _player;
 	MovingEnemy* _enemy[ENEMYCOUNT];
-	Civillian* _civillian;
+	Civillian* _civillian[CIVILLIANCOUNT];
 	Bullet* _bullet[BULLETCOUNT];
 	
 	//Audio
@@ -124,7 +133,7 @@ private:
 	SoundEffect* _background;
 
 	//Input method
-	void AttackInput(Bullet*, int elapsedTime);
+	bool AttackInput(int elapsedTime);
 	void PlayerMovement(int elapsedTime);
 
 	//Check methods
@@ -136,11 +145,12 @@ private:
 
 	//Update methods
 	void UpdatePlayer(int elapsedTime);
-	void UpdateEnemy(int enemyCurrentFrame, int enemyFrame, float enemyRectX, float enemyRectW, int elapsedTime);
-	void UpdateCivillian(int elapsedTime);
+	void UpdateEnemy(int elapsedTime);
+	void UpdateCivillian(Civillian* _civillian, int elapsedTime);
 	void BulletMovement(Bullet*, int direction, int elapsedTime);
-	void EnemyMovement(MovingEnemy* _enemy, int elapsedTime);
-	void CivillianMovement(int elapsedTime);
+	void EnemyMovement(MovingEnemy* _enemy, float civillianPositionX, float civillianPositionY, int elapsedTime);
+	void CivillianMovement(Civillian* _civillian, int elapsedTime);
+	void UpdateLoading(int elapsedTime);
 
 public:
 	/// <summary> Constructs the Pacman class. </summary>
