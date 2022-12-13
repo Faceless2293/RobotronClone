@@ -60,7 +60,7 @@ private:
 	//Start Menu Variables
 	Texture2D* _startBackground;
 	Rect* _startRectangle;
-	Vector2* _startStringPosition;
+	Vector2* _startPosition;
 	bool _started;
 
 	//Loading Screen
@@ -142,13 +142,14 @@ private:
 	void CheckCivillianViewportCollision();
 	bool CheckCollision(int x1, int y1, int width1, int height1, int x2, int y2, int width2, int height2);
 	bool CheckObjectPosition(float objectPositionX, float objectPositionY);
+	void ChangeDirection(int enemyDirection);
 
 	//Update methods
 	void UpdatePlayer(int elapsedTime);
 	void UpdateEnemy(int elapsedTime);
 	void UpdateCivillian(Civillian* _civillian, int elapsedTime);
 	void BulletMovement(Bullet*, int direction, int elapsedTime);
-	void EnemyMovement(MovingEnemy* _enemy, float civillianPositionX, float civillianPositionY, int elapsedTime);
+	void EnemyMovement(MovingEnemy* _enemy1,MovingEnemy* _enemy2, float civillianPositionX, float civillianPositionY, int elapsedTime);
 	void CivillianMovement(Civillian* _civillian, int elapsedTime);
 	void UpdateLoading(int elapsedTime);
 

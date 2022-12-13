@@ -1,6 +1,8 @@
 #include "Player.h"
 
 #include <sstream>
+#include <iostream>
+using namespace std;
 
 Player::Player(int argc, char* argv[]) : Game(argc, argv), _cPlayerSpeed(0.2f), _cPlayerFrameTime(250), _cEnemyFrameTime(250), _cCivillianFrameTime(250), _cLoadingFrameTime(250)
 {
@@ -89,7 +91,7 @@ Player::~Player()
 	delete _menuStringPosition;
 	delete _startBackground;
 	delete _startRectangle;
-	delete _startStringPosition;
+	delete _startPosition;
 	delete _gameOverBackground;
 	delete _gameOverRect;
 	delete _loadingTexture;
@@ -134,7 +136,7 @@ void Player::LoadContent()
 	{
 		_bullet[i]->position = new Vector2(_player->position->X, _player->position->Y);
 		_bullet[i]->texture = bulletTexture;
-		_bullet[i]->rect = new Rect(0.0f, 0.0f, 64, 64);
+		_bullet[i]->rect = new Rect(0.0f, 0.0f, 32, 32);
 	}
 	
 
@@ -175,9 +177,9 @@ void Player::LoadContent()
 
 	//Set Start parameters
 	_startBackground = new Texture2D();
-	_startBackground->Load("Textures/Transparency.png", false);
-	_startRectangle = new Rect(0.0f, 0.0f, Graphics::GetViewportWidth() / 2.0f, Graphics::GetViewportHeight() / 2.0f);
-	_startStringPosition = new Vector2(Graphics::GetViewportWidth() / 2.0f, Graphics::GetViewportHeight() / 2.0f);
+	_startBackground->Load("Textures/MainMenu.png", false);
+	_startRectangle = new Rect(0.0f, 0.0f, Graphics::GetViewportWidth(), Graphics::GetViewportHeight());
+	_startPosition = new Vector2(0.0f, 0.0f);
 	
 	//set Loading parameters
 	_loadingTexture = new Texture2D();
@@ -190,7 +192,7 @@ void Player::LoadContent()
 	_gameOverRect = new Rect(0.0f, 0.0f, Graphics::GetViewportWidth(), Graphics::GetViewportHeight());
 	
 	//Load sounds
-	_oof->Load("Sounds/SadTrombone.wav");
+	_oof->Load("Sounds/Game Over.wav");
 	_powerUp->Load("Sounds/PowerUp.wav");
 	_ohNo->Load("Sounds/OhNo.wav");
 	_background->Load("Sounds/BackgroundMusic.wav");
@@ -198,17 +200,17 @@ void Player::LoadContent()
 
 void Player::Update(int elapsedTime)
 {
-
-	if (!_started)
+	if (!_started)//Update doesn't start until the game has been started
 	{
-		if (!_paused)
+		UpdateLoading(elapsedTime);
+		if (!_paused)// Game won't run if the game is paused
 		{
 			PlayerMovement(elapsedTime);
 			for (int i = 0; i < ENEMYCOUNT; i++) 
 			{
 				for (int j = 0; j < CIVILLIANCOUNT; j++) 
 				{
-					EnemyMovement(_enemy[i], _civillian[j]->position->X, _civillian[j]->position->Y, elapsedTime);
+					EnemyMovement(_enemy[i], _enemy[i+1], _civillian[j]->position->X, _civillian[j]->position->Y, elapsedTime);
 					UpdateEnemy(elapsedTime);
 				}
 				
@@ -223,6 +225,13 @@ void Player::Update(int elapsedTime)
 			if (AttackInput(elapsedTime) == true) 
 			{
 				_player->isShooting = true;
+				if (_player->isShooting) 
+				{
+					for (int i = 0; i < BULLETCOUNT; i++) 
+					{
+						BulletMovement(_bullet[i], _bullet[i]->direction, elapsedTime);
+					}
+				}
 			}
 		
 			if (CheckObjectPosition(_player->position->X, _player->position->Y) == true) 
@@ -240,7 +249,8 @@ void Player::Update(int elapsedTime)
 					_player->position->X = 10000.0f;
 					_player->position->Y = 10000.0f;
 					Audio::Play(_oof);
-					_player->dead = true;			
+					_player->dead = true;	
+					_paused = true;
 				}
 			}
 			//Check collision between player and civillian
@@ -272,7 +282,7 @@ void Player::Update(int elapsedTime)
 				
 			}
 			//Check collision between enemy and bullet
-			/*for (int i = 0; i < ENEMYCOUNT; i++)
+			for (int i = 0; i < ENEMYCOUNT; i++)
 			{
 				for (int j = 0; j < BULLETCOUNT; j++) 
 					{
@@ -288,7 +298,7 @@ void Player::Update(int elapsedTime)
 					}
 				}
 				
-			}	*/	
+			}	 
 		}
 	}
 	Input::KeyboardState* keyboardState = Input::Keyboard::GetState();
@@ -314,6 +324,7 @@ void Player::Update(int elapsedTime)
 
 void Player::Draw(int elapsedTime)
 {
+
 	// Allows us to easily create a string
 	std::stringstream stream;
 	stream << "Score: " << currentScore;
@@ -321,9 +332,22 @@ void Player::Draw(int elapsedTime)
 
 	SpriteBatch::BeginDraw(); // Starts Drawing
 	SpriteBatch::Draw(_player->texture, _player->position, _player->sourceRect); // Draws Pacman
+		
+	//Draw Start Menu
+	if (_started) 
+	{
+		std::stringstream startStream;
+		startStream << "Press Space to Start!";
 
-		//Draw Pause Menu
-	if (_paused) 
+		SpriteBatch::Draw(_startBackground, _startPosition, _startRectangle);
+		//SpriteBatch::DrawString(startStream.str().c_str(), _startStringPosition, Color::Green);
+	}
+	
+	
+	
+
+	//Draw Pause Menu
+	if (_paused)
 	{
 		std::stringstream menuStream;
 		menuStream << "Paused!";
@@ -332,48 +356,40 @@ void Player::Draw(int elapsedTime)
 		SpriteBatch::DrawString(menuStream.str().c_str(), _menuStringPosition, Color::Red);
 	}
 
-		//Draw Start Menu
-	if (_started) 
-	{
-		std::stringstream startStream;
-		startStream << "Press Space to Start!";
 
-		SpriteBatch::Draw(_startBackground, _startRectangle, nullptr);
-		SpriteBatch::DrawString(startStream.str().c_str(), _startStringPosition, Color::Green);
-	}
 
 	//Draw Game Over Screen
-	if (_player->dead == true) 
+	if (_player->dead == true)
 	{
 		SpriteBatch::Draw(_gameOverBackground, _gameOverRect, nullptr);
 	}
-	
+
 	//Draw Loading Screen
-	if (_isLoading == true) 
+	if (_isLoading == true)
 	{
 		SpriteBatch::Draw(_loadingTexture, _loadingRect, nullptr);
 	}
-	
+
 	//Draw Enemy
-	for (int i = 0; i < ENEMYCOUNT; i++) 
+	for (int i = 0; i < ENEMYCOUNT; i++)
 	{
 		SpriteBatch::Draw(_enemy[i]->texture, _enemy[i]->position, _enemy[i]->rect);
 	}
-	
-	
-	
+
+
+
 
 	//Draw Bullet
-	if (_player->isShooting == true)
+	if (!_player->isShooting)
 	{
-		for (int i = 0; i < BULLETCOUNT; i++) 
+		for (int i = 0; i < BULLETCOUNT; i++)
 		{
 			SpriteBatch::Draw(_bullet[i]->texture, _bullet[i]->position, _bullet[i]->rect);
-		}	
+		}
 	}
 
 	//Draw Civillian
-	for (int i = 0; i < CIVILLIANCOUNT; i++) 
+	for (int i = 0; i < CIVILLIANCOUNT; i++)
 	{
 		SpriteBatch::Draw(_civillian[i]->texture, _civillian[i]->position, _civillian[i]->rect);
 	}
@@ -381,13 +397,14 @@ void Player::Draw(int elapsedTime)
 	// Draws String
 	SpriteBatch::DrawString(stream.str().c_str(), _stringPosition, Color::Green);
 	SpriteBatch::EndDraw(); // Ends Drawing
+	
 }
 bool Player::AttackInput(int elapsedTime)
 {
 	Input::KeyboardState* keyboardState = Input::Keyboard::GetState();
 
 	//check for input
-	if (keyboardState->IsKeyDown(Input::Keys::J))
+	if (keyboardState->IsKeyDown(Input::Keys::LEFT))
 	{
 		for (int i = 0; i < BULLETCOUNT; i++)
 		{
@@ -396,7 +413,7 @@ bool Player::AttackInput(int elapsedTime)
 		}
 		return true;
 	}
-	else if (keyboardState->IsKeyDown(Input::Keys::L))
+	else if (keyboardState->IsKeyDown(Input::Keys::RIGHT))
 	{
 		for (int i = 0; i < BULLETCOUNT; i++)
 		{
@@ -405,7 +422,7 @@ bool Player::AttackInput(int elapsedTime)
 		}
 		return true;
 	}
-	else if (keyboardState->IsKeyDown(Input::Keys::I))
+	else if (keyboardState->IsKeyDown(Input::Keys::UP))
 	{
 		for (int i = 0; i < BULLETCOUNT; i++)
 		{
@@ -414,7 +431,7 @@ bool Player::AttackInput(int elapsedTime)
 		}
 		return true;
 	}
-	else if (keyboardState->IsKeyDown(Input::Keys::K))
+	else if (keyboardState->IsKeyDown(Input::Keys::DOWN))
 	{
 		for (int i = 0; i < BULLETCOUNT; i++)
 		{
@@ -508,28 +525,28 @@ void Player::UpdatePlayer(int elapsedTime)
 void Player::BulletMovement(Bullet*, int direction, int elapsedTime) 
 {
 	//Changes tragectory of the bullet depending on it's direction which is defined by which directional key is pressed
-	if (direction == 0) 
+	if (direction == 0) //Move right
 	{
 		for (int i = 0; i < BULLETCOUNT; i++) 
 		{
 			_bullet[i]->position->X += _bullet[i]->speed * elapsedTime;
 		}
 	}
-	else if (direction == 1)
+	else if (direction == 1)//Move Left
 	{
 		for (int i = 0; i < BULLETCOUNT; i++)
 		{
 			_bullet[i]->position->X -= _bullet[i]->speed * elapsedTime;
 		}
 	}
-	else if (direction == 2)
+	else if (direction == 2)//Move down
 	{
 		for (int i = 0; i < BULLETCOUNT; i++)
 		{
 			_bullet[i]->position->Y += _bullet[i]->speed * elapsedTime;
 		}
 	}
-	if (direction == 3)
+	if (direction == 3)//Move up
 	{
 		for (int i = 0; i < BULLETCOUNT; i++)
 		{
@@ -537,32 +554,36 @@ void Player::BulletMovement(Bullet*, int direction, int elapsedTime)
 		}
 	}
 }
-void Player::EnemyMovement(MovingEnemy* _enemy, float civillianPositionX, float civillianPositionY, int elapsedTime) 
+void Player::EnemyMovement(MovingEnemy* _enemy1, MovingEnemy* _enemy2, float civillianPositionX, float civillianPositionY, int elapsedTime) 
 {
-	_enemy->speed = 0.001f;
+	_enemy1->speed = 0.001f;
 	//If the enemy is closer to the player then it will track the player
-	if ((_player->position->X - _enemy->position->X) && (_player->position->Y - _enemy->position->Y) < (civillianPositionX - _enemy->position->X) && (civillianPositionY - _enemy->position->Y))
+	if ((_player->position->X - _enemy1->position->X) && (_player->position->Y - _enemy1->position->Y) < (civillianPositionX - _enemy1->position->X) && (civillianPositionY - _enemy1->position->Y))
 	{
-		float targetX = _player->position->X - _enemy->position->X;
-		float targetY = _player->position->Y - _enemy->position->Y;
-		_enemy->position->X += targetX * _enemy->speed;
-		_enemy->position->Y += targetY * _enemy->speed;
+		float targetX = _player->position->X - _enemy1->position->X;
+		float targetY = _player->position->Y - _enemy1->position->Y;
+		_enemy1->position->X += targetX * _enemy1->speed;
+		_enemy1->position->Y += targetY * _enemy1->speed;
 	}
 	//If the enemy is closer to the civillian then it will track the civillian
-	/*else if ((_player->position->X - _enemy->position->X) && (_player->position->Y - _enemy->position->Y) > (_civillian->position->X - _enemy->position->X) && (_civillian->position->Y - _enemy->position->Y))
+	else if ((_player->position->X - _enemy1->position->X) && (_player->position->Y - _enemy1->position->Y) > (civillianPositionX - _enemy1->position->X) && (civillianPositionY - _enemy1->position->Y))
 	{
-		float targetX = _civillian->position->X - _enemy->position->X;
-		float targetY = _civillian->position->Y - _enemy->position->Y;
-		_enemy->position->X += targetX * _enemy->speed;
-		_enemy->position->Y += targetY * _enemy->speed;
-	}*/
+		float targetX = civillianPositionX - _enemy1->position->X;
+		float targetY = civillianPositionY - _enemy1->position->Y;
+		_enemy1->position->X += targetX * _enemy1->speed;
+		_enemy1->position->Y += targetY * _enemy1->speed;
+	}
 	//track player by deafault
 	else 
 	{
-		float targetX = _player->position->X - _enemy->position->X;
-		float targetY = _player->position->Y - _enemy->position->Y;
-		_enemy->position->X += targetX * _enemy->speed;
-		_enemy->position->Y += targetY * _enemy->speed;
+		float targetX = _player->position->X - _enemy1->position->X;
+		float targetY = _player->position->Y - _enemy1->position->Y;
+		_enemy1->position->X += targetX * _enemy1->speed;
+		_enemy1->position->Y += targetY * _enemy1->speed;
+	}
+	if (_enemy1->position->X == _enemy2->position->X || _enemy1->position->Y == _enemy2->position->Y) 
+	{
+		ChangeDirection(_enemy1->direction);
 	}
 }
 void Player::UpdateEnemy(int elapsedTime)
@@ -581,6 +602,13 @@ void Player::UpdateEnemy(int elapsedTime)
 		}
 		_enemy[i]->rect->X = _enemy[i]->rect->Width * _enemy[i]->frame * elapsedTime;
 		_enemy[i]->frame++;
+
+		if (_enemy[i]->isDead) 
+		{		
+			_enemy[i]->rect->Y = _enemy[i]->rect->Height * 2;
+			_enemy[i]->rect->X = _enemy[i]->rect->Width * _enemy[i]->frame * elapsedTime;
+			_enemy[i]->frame++;
+		}
 	}
 }
 void Player::CivillianMovement(Civillian* _civillian, int elapsedTime) 
@@ -596,7 +624,7 @@ void Player::CivillianMovement(Civillian* _civillian, int elapsedTime)
 	else if (_civillian->direction == 1)//Moves Up
 	{
 		_civillian->position->Y -= _civillian->speed * elapsedTime;
-		if (_civillian->position->X + _civillian->rect->Height <= 32); 
+		if (_civillian->position->Y + _civillian->rect->Height <= 32); 
 		{
 			_civillian->direction = (rand() % 4);
 		}
@@ -612,9 +640,9 @@ void Player::CivillianMovement(Civillian* _civillian, int elapsedTime)
 	else if (_civillian->direction == 3) //Moves Left
 	{
 		_civillian->position->X -= _civillian->speed * elapsedTime;
-		if (_civillian->position->Y <= 0)
+		if (_civillian->position->X <= 32)
 		{
-			_civillian->direction = 2;
+			_civillian->direction = (rand() % 4);
 		}
 	}
 }
@@ -692,4 +720,15 @@ void Player::UpdateLoading(int elapsedTime)
 	//Traverses the sprite sheet when direcitons are input
 	_loadingRect->X = _loadingRect->Width * _loadingFrame * elapsedTime;
 	_loadingFrame++;
+}
+void Player::ChangeDirection(int enemyDirection) 
+{
+	if (enemyDirection == 0)
+		enemyDirection = 1;
+	else if (enemyDirection == 1)
+		enemyDirection = 0;
+	else if (enemyDirection == 2)
+		enemyDirection = 3;
+	else if (enemyDirection == 3)
+		enemyDirection = 2;
 }
