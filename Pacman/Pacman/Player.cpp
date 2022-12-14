@@ -234,7 +234,7 @@ void Player::Update(int elapsedTime)
 				}
 			}
 		
-			if (CheckObjectPosition(_player->position->X, _player->position->Y) == true) 
+			if (CheckObjectPosition(_player->position->X, _player->position->Y) == true)
 			{
 				Audio::Play(_background);
 			}
@@ -331,7 +331,7 @@ void Player::Draw(int elapsedTime)
 
 
 	SpriteBatch::BeginDraw(); // Starts Drawing
-	SpriteBatch::Draw(_player->texture, _player->position, _player->sourceRect); // Draws Pacman
+	SpriteBatch::Draw(_player->texture, _player->position, _player->sourceRect); // Draws Player
 		
 	//Draw Start Menu
 	if (_started) 
