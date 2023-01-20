@@ -51,9 +51,10 @@ Player::Player(int argc, char* argv[]) : Game(argc, argv), _cPlayerSpeed(0.2f), 
 	for (int i = 0; i < BULLETCOUNT; i++)
 	{
 		_bullet[i] = new Bullet();
-		_bullet[i]->speed = 1.0f;
+		_bullet[i]->speed = 0.3f;
 		_bullet[i]->direction = 0;
 		_bullet[i]->position = _player->position;
+		_bullet[i]->isActive = false;
 	}
 
 	//Initialise Audio
@@ -205,6 +206,10 @@ void Player::Update(int elapsedTime)
 		UpdateLoading(elapsedTime);
 		if (!_paused)// Game won't run if the game is paused
 		{
+			for (int i = 0; i < BULLETCOUNT; i++) 
+			{
+				BulletMovement(_bullet[i], _bullet[i]->direction, elapsedTime);
+			}
 			PlayerMovement(elapsedTime);
 			for (int i = 0; i < ENEMYCOUNT; i++) 
 			{
@@ -222,7 +227,7 @@ void Player::Update(int elapsedTime)
 			}
 
 			
-			if (AttackInput(elapsedTime) == true) 
+			/*if (AttackInput(elapsedTime) == true)
 			{
 				_player->isShooting = true;
 				if (_player->isShooting) 
@@ -232,7 +237,7 @@ void Player::Update(int elapsedTime)
 						BulletMovement(_bullet[i], _bullet[i]->direction, elapsedTime);
 					}
 				}
-			}
+			}*/
 		
 			if (CheckObjectPosition(_player->position->X, _player->position->Y) == true)
 			{
@@ -380,13 +385,11 @@ void Player::Draw(int elapsedTime)
 
 
 	//Draw Bullet
-	if (!_player->isShooting)
+	for (int i = 0; i < BULLETCOUNT; i++)
 	{
-		for (int i = 0; i < BULLETCOUNT; i++)
-		{
-			SpriteBatch::Draw(_bullet[i]->texture, _bullet[i]->position, _bullet[i]->rect);
-		}
+		SpriteBatch::Draw(_bullet[i]->texture, _bullet[i]->position, _bullet[i]->rect);
 	}
+	
 
 	//Draw Civillian
 	for (int i = 0; i < CIVILLIANCOUNT; i++)
@@ -399,7 +402,7 @@ void Player::Draw(int elapsedTime)
 	SpriteBatch::EndDraw(); // Ends Drawing
 	
 }
-bool Player::AttackInput(int elapsedTime)
+/*bool Player::AttackInput(int elapsedTime)
 {
 	Input::KeyboardState* keyboardState = Input::Keyboard::GetState();
 
@@ -442,7 +445,7 @@ bool Player::AttackInput(int elapsedTime)
 	}
 	else
 		return false;
-}
+}*/
 void Player::CheckPaused(Input::KeyboardState* state, Input::Keys pauseKey) 
 {
 
@@ -522,10 +525,10 @@ void Player::UpdatePlayer(int elapsedTime)
 	_player->sourceRect->X = _player->sourceRect->Width * _player->frame * elapsedTime;
 	_player->frame++;
 }
-void Player::BulletMovement(Bullet*, int direction, int elapsedTime) 
+void Player::BulletMovement(Bullet* bullet, int direction, int elapsedTime) 
 {
 	//Changes tragectory of the bullet depending on it's direction which is defined by which directional key is pressed
-	if (direction == 0) //Move right
+	/*if (direction == 0) //Move right
 	{
 		for (int i = 0; i < BULLETCOUNT; i++) 
 		{
@@ -552,7 +555,8 @@ void Player::BulletMovement(Bullet*, int direction, int elapsedTime)
 		{
 			_bullet[i]->position->Y -= _bullet[i]->speed * elapsedTime;
 		}
-	}
+	}*/
+	bullet->position->X += direction * elapsedTime;
 }
 void Player::EnemyMovement(MovingEnemy* _enemy1, MovingEnemy* _enemy2, float civillianPositionX, float civillianPositionY, int elapsedTime) 
 {

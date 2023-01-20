@@ -83,6 +83,7 @@ private:
 		Vector2* position;
 		int direction;
 		float speed;
+		bool isActive;
 	};
 	
 
@@ -133,7 +134,7 @@ private:
 	SoundEffect* _background;
 
 	//Input method
-	bool AttackInput(int elapsedTime);
+	//bool AttackInput(int elapsedTime);
 	void PlayerMovement(int elapsedTime);
 
 	//Check methods
